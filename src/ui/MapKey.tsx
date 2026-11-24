@@ -86,6 +86,14 @@ export function MapKey({ colorBy }: { colorBy: ColorBy }) {
                 <Row glyph={<Glyph type="dot" color="#ef4444" />} label="Hot / notorious" />
               </>
             )}
+            {colorBy === "jurisdiction" && (
+              <>
+                <Row glyph={<Glyph type="dot" color="#34d399" />} label="Domestic (reachable)" />
+                <Row glyph={<Glyph type="dot" color="#f59e0b" />} label="Partner (needs cooperation)" />
+                <Row glyph={<Glyph type="dot" color="#ef4444" />} label="Non-cooperating haven" />
+                <Row glyph={<Glyph type="dot" color="#b91c1c" />} label="Shielded (controlled impunity)" />
+              </>
+            )}
             <div className="hint" style={{ marginTop: 4 }}>Bright + white core = attacking now · dim = roaming</div>
           </div>
 

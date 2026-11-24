@@ -41,6 +41,12 @@ export type AgentState =
   | "jailed"
   | "desisted";
 
+/** Where an offender operates from — the reach of enforcement depends on it. */
+export type Jurisdiction =
+  | "domestic" // cooperating — directly reachable
+  | "partner" // reachable with cooperation (MLAT etc.)
+  | "haven"; // non-cooperating safe haven
+
 export interface Agent {
   id: number;
   x: number;
@@ -64,7 +70,8 @@ export interface Agent {
   ops: number;
   busts: number;
   lastEU: number; // last computed expected utility (for the inspector)
-  safeHaven: boolean; // outside easy reach unless cooperation is high
+  jurisdiction: Jurisdiction; // where they operate from
+  shielded: boolean; // "controlled impunity" — protected regardless of cooperation
   invProgress: number; // 0..1 how far a case has been built against them
 }
 
@@ -155,6 +162,11 @@ export interface Metrics {
   fieldedCapability: number; // 0..1 enforcement capability actually stood up (lags funding)
   openInvestigations: number; // active cases being built
   meanTimeToArrestDays: number; // from first offence to capture
+  byJurisdiction: Record<Jurisdiction, number>; // offender population by origin
+  shieldedCount: number; // offenders under controlled impunity
+  // breach-disclosure lag — authorities act on what's been DISCLOSED, which trails reality
+  disclosedBreaches: number;
+  disclosedLoss: number;
 }
 
 export interface WorldConfig {

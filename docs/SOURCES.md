@@ -65,6 +65,7 @@ scale — see [CALIBRATION.md](CALIBRATION.md).
 - **Deterrence** — Maimon, Howell & Burruss, *Restrictive deterrence and the scope of hackers' reoffending* (randomised field trials, Computers in Human Behavior, 2021).
 - **Harm scale** — Cybersecurity Ventures, *2025 Cybersecurity Almanac* ($10.5T in 2025; $12.2T by 2031).
 - **Response timescales** — IBM *Cost of a Data Breach 2025* (breach lifecycle ~241 days; recovery times); breach-filing analysis of 1,031 filings (ransomware detected ~19 days, malware ~93); FBI CFAA investigation timelines (1–3 years) and cybercrime prosecution-difficulty analyses; Operation Cronos / LockBit takedown timelines.
+- **Jurisdiction & safe havens** — Recorded Future, *Dark Covenant 3.0: Controlled Impunity and Russia's Cybercriminals* (state-controlled market; shielding of state-useful actors); CyberPeace Institute, *Ransomware — Follow the Threat Actor* (threat-actor country connections); UNODC *Cybercrime Module 7* (formal international cooperation mechanisms); cyber-attribution literature.
 
 ## Agent-based modelling for cybercrime policy
 

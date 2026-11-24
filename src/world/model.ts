@@ -5,6 +5,7 @@ import {
   clamp01,
   expectedUtility,
   perceivedCatch,
+  reachFactor,
   recruitMotivation,
 } from "./psychology";
 import type {
@@ -12,6 +13,7 @@ import type {
   Drivers,
   Guardian,
   Interventions,
+  Jurisdiction,
   Metrics,
   MotivationId,
   Sector,
@@ -99,6 +101,7 @@ const LAG_K = 0.0045; // enforcement capability lags funding (~months to field)
 const INV_GAIN = 0.055; // per-tick case-building while a guardian is on an offender
 const INV_DECAY = 0.004; // cases go cold without sustained attention
 const DETERRED_DESIST = 0.012;
+const DISC_K = 0.006; // breach-disclosure lag (~weeks to surface)
 
 export interface HistoryPoint {
   tick: number;
@@ -200,6 +203,9 @@ export class World {
     const edge = this.rng.next();
     const x = edge < 0.5 ? this.rng.next() * W : this.rng.next() < 0.5 ? 0 : W;
     const y = edge < 0.5 ? (this.rng.next() < 0.5 ? 0 : H) : this.rng.next() * H;
+    // Origin jurisdiction: ~45% domestic, ~25% partner, ~30% non-cooperating haven.
+    const jr = this.rng.next();
+    const jur: Jurisdiction = jr < 0.45 ? "domestic" : jr < 0.7 ? "partner" : "haven";
     return {
       id,
       x,
@@ -223,7 +229,10 @@ export class World {
       ops: 0,
       busts: 0,
       lastEU: 0,
-      safeHaven: this.rng.next() < 0.45, // many operate from non-cooperating jurisdictions
+      jurisdiction: jur,
+      // "controlled impunity": a share of haven actors are shielded regardless
+      // of cooperation (Recorded Future, Dark Covenant 3.0).
+      shielded: jur === "haven" && this.rng.next() < 0.4,
       invProgress: 0,
     };
   }
@@ -356,10 +365,10 @@ export class World {
           g.x += (dx / dist) * speed * 0.3; // hover, keep building the case
           g.y += (dy / dist) * speed * 0.3;
           if (target_.invProgress >= 1) {
-            // Enough evidence: attempt the arrest. Reach into safe havens
-            // depends almost entirely on international cooperation.
-            let p = 0.6;
-            if (target_.safeHaven) p *= 0.3 + 0.7 * iv.cooperation;
+            // Enough evidence: attempt the arrest. Reach depends on the
+            // offender's jurisdiction and your cooperation — havens and the
+            // shielded are far harder to touch.
+            const p = 0.72 * reachFactor(target_.jurisdiction, target_.shielded, iv.cooperation);
             if (this.rng.chance(p)) {
               target_.state = "jailed";
               target_.cooldown = 140 + Math.floor((0.5 + iv.cooperation) * 200);
@@ -528,7 +537,8 @@ export class World {
           morality: a.morality,
           greed: a.greed,
           heat: a.heat,
-          safeHaven: a.safeHaven,
+          jurisdiction: a.jurisdiction,
+          shielded: a.shielded,
           distance: dist,
         },
         sec,
@@ -635,7 +645,7 @@ export class World {
   private maybeCaught(a: Agent, iv: Interventions, postFail = false): boolean {
     // Catching an offender in the act is rare — most captures come from slow
     // investigations (stepGuardians), not a lucky moment.
-    const p = perceivedCatch(a.heat, a.safeHaven, iv) * (postFail ? 0.03 : 0.008);
+    const p = perceivedCatch(a.heat, a.jurisdiction, a.shielded, iv) * (postFail ? 0.03 : 0.008);
     if (this.rng.chance(p)) {
       a.busts++;
       a.state = "jailed";
@@ -726,13 +736,20 @@ export class World {
 
   private recomputeLive() {
     const mix = blankMix();
+    const jur: Record<Jurisdiction, number> = { domestic: 0, partner: 0, haven: 0 };
     let active = 0;
     let openCases = 0;
+    let shielded = 0;
     for (const a of this.agents) {
       mix[a.mot]++;
+      jur[a.jurisdiction]++;
+      if (a.shielded) shielded++;
       if (a.state === "operate" || a.state === "travel") active++;
       if (a.invProgress > 0.15) openCases++;
     }
+    // Breach disclosure trails reality by weeks — authorities act on partial data.
+    this.m.disclosedBreaches += (this.m.breaches - this.m.disclosedBreaches) * DISC_K;
+    this.m.disclosedLoss += (this.m.financialLoss - this.m.disclosedLoss) * DISC_K;
     this.m.population = this.agents.length;
     this.m.byMotivation = mix;
     this.m.activeOps = active;
@@ -744,6 +761,8 @@ export class World {
     this.m.fieldedCapability = funded > 0.02 ? Math.min(1, this.budgetUsed(this.effIv) / funded) : 1;
     this.m.openInvestigations = openCases;
     this.m.meanTimeToArrestDays = this.arrestAgeCount ? this.arrestAgeSum / this.arrestAgeCount / TICKS_PER_DAY : 0;
+    this.m.byJurisdiction = jur;
+    this.m.shieldedCount = shielded;
   }
 
   private snapshot() {
@@ -787,6 +806,10 @@ export class World {
       fieldedCapability: 1,
       openInvestigations: 0,
       meanTimeToArrestDays: 0,
+      byJurisdiction: { domestic: 0, partner: 0, haven: 0 },
+      shieldedCount: 0,
+      disclosedBreaches: 0,
+      disclosedLoss: 0,
     };
   }
 
@@ -827,7 +850,7 @@ export class World {
     const opportunistic = share("opportunistic");
     const ideological = share("ideological");
     const havenPressure = this.agents.length
-      ? this.agents.filter((a) => a.safeHaven).length / this.agents.length
+      ? this.agents.filter((a) => a.jurisdiction === "haven").length / this.agents.length
       : 0.5;
     const defenseGap = Math.max(0, (90 - this.m.gdpIndex) / 90);
 

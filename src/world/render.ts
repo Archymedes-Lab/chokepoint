@@ -19,7 +19,7 @@ import type { Agent } from "./types";
  * The "colour by" lens recolours offenders by motivation, by activity, or by
  * heat without changing the taxonomy.
  */
-export type ColorBy = "motivation" | "activity" | "heat";
+export type ColorBy = "motivation" | "activity" | "heat" | "jurisdiction";
 
 export interface ViewState {
   selectedId: number | null;
@@ -41,9 +41,18 @@ const PULSE: Record<string, string> = {
   patch: "#22c55e",
 };
 
+export const JURISDICTION_COLORS = {
+  domestic: "#34d399", // reachable
+  partner: "#f59e0b", // reachable with cooperation
+  haven: "#ef4444", // non-cooperating
+  shielded: "#b91c1c", // controlled impunity
+} as const;
+
 function agentColor(a: Agent, mode: ColorBy): string {
   if (mode === "activity") return ACTIVITY[a.state] ?? "#64748b";
   if (mode === "heat") return heatColor(a.heat);
+  if (mode === "jurisdiction")
+    return a.shielded ? JURISDICTION_COLORS.shielded : JURISDICTION_COLORS[a.jurisdiction];
   return MOTIVATIONS[a.mot].color;
 }
 

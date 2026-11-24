@@ -16,6 +16,7 @@ const COLOR_MODES: [ColorBy, string][] = [
   ["motivation", "Motivation"],
   ["activity", "Activity"],
   ["heat", "Heat"],
+  ["jurisdiction", "Origin"],
 ];
 
 export function Ecosystem() {

@@ -13,7 +13,7 @@
  * utilities change, so behaviour — targeting, persistence, desistance —
  * emerges rather than being scripted.
  */
-import type { Drivers, Interventions, Motivation, MotivationId, Sector } from "./types";
+import type { Drivers, Interventions, Jurisdiction, Motivation, MotivationId, Sector } from "./types";
 import type { RNG } from "../sim/rng";
 
 export const MOTIVATIONS: Record<MotivationId, Motivation> = {
@@ -101,14 +101,27 @@ export function effectiveSkill(skill: number, d: Drivers): number {
   return Math.min(1, skill + d.toolingAvailability * (1 - skill) * 0.5);
 }
 
+/**
+ * How far enforcement can reach an offender in a given jurisdiction. Domestic
+ * actors are fully reachable; partners need cooperation; non-cooperating havens
+ * need a lot of it; and the "shielded" (controlled impunity, per Dark Covenant
+ * 3.0) are essentially untouchable regardless.
+ */
+export function reachFactor(jur: Jurisdiction, shielded: boolean, coop: number): number {
+  if (shielded) return 0.03;
+  if (jur === "domestic") return 1;
+  if (jur === "partner") return 0.4 + 0.6 * coop;
+  return 0.12 + 0.6 * coop; // haven
+}
+
 /** Perceived probability of being caught operating on a node in a sector. */
 export function perceivedCatch(
   heat: number,
-  safeHaven: boolean,
+  jur: Jurisdiction,
+  shielded: boolean,
   iv: Interventions,
 ): number {
-  let p = 0.04 + heat * 0.4 + iv.arrests * 0.45;
-  if (safeHaven) p *= 0.25 + 0.75 * iv.cooperation; // havens need cooperation to reach
+  const p = (0.04 + heat * 0.4 + iv.arrests * 0.45) * reachFactor(jur, shielded, iv.cooperation);
   return Math.min(0.95, p);
 }
 
@@ -125,7 +138,8 @@ export function expectedUtility(
     morality: number;
     greed: number;
     heat: number;
-    safeHaven: boolean;
+    jurisdiction: Jurisdiction;
+    shielded: boolean;
     distance: number; // normalised 0..1
   },
   sector: Sector,
@@ -146,7 +160,7 @@ export function expectedUtility(
   const reward = (money + status) * bias;
 
   // Punishment: certainty × severity, scaled by how deterrable the offender is.
-  const pCaught = perceivedCatch(args.heat, args.safeHaven, iv);
+  const pCaught = perceivedCatch(args.heat, args.jurisdiction, args.shielded, iv);
   const severity = 60 * (1 - args.riskTolerance * args.mot.riskBias * 0.6);
   const punishment = pCaught * severity * args.mot.deterrability;
 

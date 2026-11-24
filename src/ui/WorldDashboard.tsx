@@ -2,6 +2,7 @@ import type { World, HistoryPoint } from "../world/model";
 import { money } from "../world/model";
 import { MOTIVATIONS, MOTIVATION_IDS } from "../world/psychology";
 import { ScrollArea } from "./radix";
+import { JURISDICTION_COLORS } from "../world/render";
 
 export function WorldDashboard({ world }: { world: World }) {
   const m = world.metrics();
@@ -91,12 +92,19 @@ export function WorldDashboard({ world }: { world: World }) {
               tone="gov"
             />
             <Big label="Total arrests" value={compact(m.arrestsMade)} tone="gov" />
+            <Big label="Disclosed breaches" value={compact(Math.round(m.disclosedBreaches))} tone="defender" />
+            <Big
+              label="Undisclosed (pending)"
+              value={compact(Math.max(0, Math.round(m.breaches - m.disclosedBreaches)))}
+              tone="attacker"
+            />
           </div>
           <div className="note">
             The response is slow and leaky on purpose. Ransomware is spotted in ~19 days, stealthier
             malware ~93 (breach filings); investigations run <b>1–3 years</b> and most never clear;
             and funded capability takes <b>months to field</b>. Enforcement mostly <i>deters</i> —
-            it rarely catches anyone in the act.
+            it rarely catches anyone in the act. And authorities act on <b>disclosed</b> data, which
+            trails the real breach count by weeks — the picture is always an undercount.
           </div>
         </div>
       </section>
@@ -147,6 +155,28 @@ export function WorldDashboard({ world }: { world: World }) {
               <span className="num">{Math.round(s.economy)}%</span>
             </div>
           ))}
+
+          <div className="eyebrow" style={{ margin: "0.9rem 0 0.4rem" }}>Offenders by origin — reach depends on cooperation</div>
+          {([
+            ["domestic", "Domestic (reachable)", JURISDICTION_COLORS.domestic],
+            ["partner", "Partner (needs cooperation)", JURISDICTION_COLORS.partner],
+            ["haven", "Non-cooperating haven", JURISDICTION_COLORS.haven],
+          ] as const).map(([k, label, col]) => {
+            const n = m.byJurisdiction[k] ?? 0;
+            return (
+              <div className="hbar" key={k}>
+                <span className="lab" title={label}>{label}</span>
+                <span className="track">
+                  <span className="fill" style={{ width: `${(n / pop) * 100}%`, background: col }} />
+                </span>
+                <span className="num">{compact(n)}</span>
+              </div>
+            );
+          })}
+          <div className="hint" style={{ marginTop: 6 }}>
+            Of these, <b style={{ color: "var(--crit)" }}>{compact(m.shieldedCount)}</b> are shielded —
+            "controlled impunity" that enforcement can't reach regardless of cooperation.
+          </div>
         </div>
       </section>
 

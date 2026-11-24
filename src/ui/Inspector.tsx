@@ -35,7 +35,9 @@ export function Inspector({ world, selectedId }: { world: World; selectedId: num
               <span className="prof-chip" style={{ background: MOTIVATIONS[a.mot].color }} />
               <div>
                 <div className="prof-name">{MOTIVATIONS[a.mot].name}</div>
-                <div className="muted" style={{ fontSize: "0.72rem" }}>{STATE_LABEL[a.state]}{a.safeHaven ? " · safe-haven jurisdiction" : ""}</div>
+                <div className="muted" style={{ fontSize: "0.72rem" }}>
+                  {STATE_LABEL[a.state]} · {a.shielded ? "shielded (controlled impunity)" : `${a.jurisdiction} jurisdiction`}
+                </div>
               </div>
             </div>
             <div className="prof-blurb">{MOTIVATIONS[a.mot].blurb}</div>

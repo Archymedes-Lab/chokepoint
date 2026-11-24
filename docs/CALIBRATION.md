@@ -30,8 +30,25 @@ was validated. Figures are 2025–2026 unless noted.
 | **Breach lifecycle ~241 days** | Mean time to identify + contain; global breach cost $4.44M | IBM 2025 |
 | **Investigations run 1–3 years; low clearance** | FBI CFAA hacking cases typically 1–3 years; cybercrime is uniquely hard to investigate/prosecute | FBI/legal analyses |
 | **Capability takes months to field** | Standing up enforcement/defence is slow; takedowns (Cronos) are multi-year ops | Operation Cronos analyses |
+| **Offenders sit in tiered jurisdictions; some shielded** | Non-cooperating safe havens; Russia's ecosystem is a state-controlled market with "controlled impunity" shielding state-useful actors | Recorded Future *Dark Covenant 3.0*; CyberPeace Institute |
+| **Enforcement reach is cooperation-gated** | International cooperation hinges on harmonised law and MLATs; attribution is hard and slow | UNODC Cybercrime Module 7; attribution literature |
+| **Harm is disclosed late** | Breach notification/disclosure trails discovery (regulatory lag), which itself trails the breach | Breach-notification analyses; IBM lifecycle |
 
 Full citations in [SOURCES.md](SOURCES.md).
+
+### Jurisdiction & disclosure (two more realism layers)
+
+- **Origin jurisdiction.** Each offender operates from a *domestic* (reachable), *partner*
+  (reachable with cooperation), or *non-cooperating haven* jurisdiction, and a share of
+  haven actors are **shielded** — controlled impunity that enforcement can't touch
+  regardless of cooperation. So the cooperation lever has a concrete, visible effect:
+  raising it reaches into partners and havens (validation: more arrests and fewer breaches
+  under high cooperation), while the shielded persist. View it with the **Origin** colour
+  lens and the "offenders by origin" breakdown.
+- **Disclosure lag.** Harm is booked to the model's truth immediately, but the *disclosed*
+  figures authorities see trail reality by weeks (first-order lag), so the dashboard shows
+  "disclosed breaches" and an "undisclosed (pending)" gap — a reminder that the picture is
+  always an undercount and interventions are chosen on stale data.
 
 ### Response timescales (what makes the response realistically slow)
 
