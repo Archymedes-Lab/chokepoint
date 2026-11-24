@@ -93,6 +93,13 @@ const SECTOR_BASE_VALUE: Record<string, number> = {
   retail: 85_000,
 };
 
+// Real-time mapping & response-latency constants (see docs/CALIBRATION.md).
+const TICKS_PER_DAY = 4; // 1 tick = 6 hours
+const LAG_K = 0.0045; // enforcement capability lags funding (~months to field)
+const INV_GAIN = 0.055; // per-tick case-building while a guardian is on an offender
+const INV_DECAY = 0.004; // cases go cold without sustained attention
+const DETERRED_DESIST = 0.012;
+
 export interface HistoryPoint {
   tick: number;
   loss: number;
@@ -133,9 +140,21 @@ export class World {
   history: HistoryPoint[] = [];
   events: { tick: number; text: string; kind: "breach" | "arrest" | "wave" | "policy" | "takedown" }[] = [];
 
+  /** Enforcement capability actually fielded — lags the funded `interventions`. */
+  effIv: Interventions = {
+    takedown: 0,
+    arrests: 0.15,
+    cashoutDisruption: 0,
+    hardening: 0,
+    cooperation: 0.1,
+    diversion: 0,
+  };
+
   private nextId = 1;
   private nextGid = 1;
   private recruitAcc = 0;
+  private arrestAgeSum = 0;
+  private arrestAgeCount = 0;
   private successMix: Record<MotivationId, number> = blankMix();
   private m: Metrics;
   readonly maxAgents = 5000;
@@ -203,12 +222,15 @@ export class World {
       busts: 0,
       lastEU: 0,
       safeHaven: this.rng.next() < 0.45, // many operate from non-cooperating jurisdictions
+      invProgress: 0,
     };
   }
 
-  /** Drivers after authority interventions push back on the root causes. */
+  /** Drivers after authority interventions push back on the root causes.
+   *  Uses FIELDED capability (effIv), which lags funding — policy takes months
+   *  to bite. */
   effectiveDrivers(): Drivers {
-    const iv = this.interventions;
+    const iv = this.effIv;
     const d = this.drivers;
     return {
       economicStrain: clamp01(d.economicStrain - iv.diversion * 0.3),
@@ -221,9 +243,9 @@ export class World {
     };
   }
 
-  /** Fraction of the authority budget the current intervention mix consumes. */
-  budgetUsed(): number {
-    const iv = this.interventions;
+  /** Fraction of the authority budget an intervention mix consumes. */
+  budgetUsed(src?: Interventions): number {
+    const iv = src ?? this.interventions;
     // Weighted "cost" of each lever; cooperation and diversion are cheaper.
     return (
       iv.takedown * 1.1 +
@@ -236,9 +258,14 @@ export class World {
   }
 
   step() {
-    const d = this.effectiveDrivers();
-    const iv = this.interventions;
     this.m.tick++;
+    // Fielded capability ramps toward funding — standing up enforcement and
+    // defence takes months, so a slider move doesn't bite immediately.
+    for (const k of Object.keys(this.effIv) as (keyof Interventions)[])
+      this.effIv[k] += (this.interventions[k] - this.effIv[k]) * LAG_K;
+
+    const d = this.effectiveDrivers();
+    const iv = this.effIv;
 
     this.recruit(d);
     const decay = blankMix();
@@ -246,6 +273,7 @@ export class World {
     for (const a of this.agents) {
       a.ageTicks++;
       a.heat = Math.max(0, a.heat - 0.012);
+      a.invProgress = Math.max(0, a.invProgress - INV_DECAY); // cases go cold
       this.stepAgent(a, d, iv);
       if (a.state !== "jailed" && a.state !== "desisted") decay[a.mot]++;
     }
@@ -317,20 +345,33 @@ export class World {
         const dy = target_.y - g.y;
         const dist = Math.hypot(dx, dy) || 1;
         const speed = 3.1; // faster than offenders — they close in
-        if (dist < 7) {
-          // contact: attempt to catch. Safe-haven offenders need cooperation.
-          let p = 0.35 + iv.arrests * 0.4 + target_.heat * 0.2;
-          if (target_.safeHaven) p *= 0.25 + 0.75 * iv.cooperation;
-          if (this.rng.chance(p)) {
-            target_.state = "jailed";
-            target_.cooldown = 140 + Math.floor((0.5 + iv.cooperation) * 200);
-            target_.heat = 0;
-            this.m.arrestsMade++;
-            this.m.defenderEvictions++;
-            this.pulses.push({ x: target_.x, y: target_.y, r: 0, life: 1, kind: "arrest" });
+        if (dist < 10) {
+          // Contact builds a CASE over time — cybercrime is slow to clear
+          // (FBI hacking cases run 1–3 years; most never resolve). Stay on
+          // them and accrue investigation progress rather than catching instantly.
+          target_.invProgress = Math.min(1, target_.invProgress + INV_GAIN * (0.5 + iv.arrests));
+          g.x += (dx / dist) * speed * 0.3; // hover, keep building the case
+          g.y += (dy / dist) * speed * 0.3;
+          if (target_.invProgress >= 1) {
+            // Enough evidence: attempt the arrest. Reach into safe havens
+            // depends almost entirely on international cooperation.
+            let p = 0.6;
+            if (target_.safeHaven) p *= 0.3 + 0.7 * iv.cooperation;
+            if (this.rng.chance(p)) {
+              target_.state = "jailed";
+              target_.cooldown = 140 + Math.floor((0.5 + iv.cooperation) * 200);
+              target_.heat = 0;
+              this.m.arrestsMade++;
+              this.m.defenderEvictions++;
+              this.arrestAgeSum += target_.ageTicks;
+              this.arrestAgeCount++;
+              this.pulses.push({ x: target_.x, y: target_.y, r: 0, life: 1, kind: "arrest" });
+            } else {
+              target_.invProgress = 0.5; // case stalls — partial, resumes later
+            }
+            g.targetId = -1;
+            g.state = "patrol";
           }
-          g.targetId = -1;
-          g.state = "patrol";
         } else {
           g.x += (dx / dist) * speed;
           g.y += (dy / dist) * speed;
@@ -501,7 +542,7 @@ export class World {
     a.lastEU = best;
     if (best <= 0 || bestS < 0) {
       // Deterred: nothing is worth it right now.
-      if (this.rng.chance(0.015 + a.deterrability * 0.05 + iv.diversion * 0.04)) {
+      if (this.rng.chance(DETERRED_DESIST + a.deterrability * 0.05 + iv.diversion * 0.04)) {
         a.state = "desisted";
         this.m.desistances++;
       } else {
@@ -585,13 +626,17 @@ export class World {
   }
 
   private maybeCaught(a: Agent, iv: Interventions, postFail = false): boolean {
-    const p = perceivedCatch(a.heat, a.safeHaven, iv) * (postFail ? 0.08 : 0.02);
+    // Catching an offender in the act is rare — most captures come from slow
+    // investigations (stepGuardians), not a lucky moment.
+    const p = perceivedCatch(a.heat, a.safeHaven, iv) * (postFail ? 0.03 : 0.008);
     if (this.rng.chance(p)) {
       a.busts++;
       a.state = "jailed";
       a.cooldown = 120 + Math.floor((0.5 + iv.cooperation) * 200) + (a.mot === "professional" ? 150 : 0);
       a.heat = 0;
       this.m.arrestsMade++;
+      this.arrestAgeSum += a.ageTicks;
+      this.arrestAgeCount++;
       this.pulses.push({ x: a.x, y: a.y, r: 0, life: 1, kind: "arrest" });
       if (a.wealth > 500_000 || a.mot === "professional")
         this.pushEvent("arrest", `Authorities arrested a ${MOTIVATIONS[a.mot].name} offender.`);
@@ -675,9 +720,11 @@ export class World {
   private recomputeLive() {
     const mix = blankMix();
     let active = 0;
+    let openCases = 0;
     for (const a of this.agents) {
       mix[a.mot]++;
       if (a.state === "operate" || a.state === "travel") active++;
+      if (a.invProgress > 0.15) openCases++;
     }
     this.m.population = this.agents.length;
     this.m.byMotivation = mix;
@@ -685,6 +732,11 @@ export class World {
     this.m.gdpIndex = this.sectors.reduce((s, sec) => s + sec.economy * sec.gdpWeight, 0);
     this.m.budgetUsed = this.budgetUsed();
     this.m.guardians = this.guardians.length;
+    this.m.day = Math.floor(this.m.tick / TICKS_PER_DAY);
+    const funded = this.budgetUsed(this.interventions);
+    this.m.fieldedCapability = funded > 0.02 ? Math.min(1, this.budgetUsed(this.effIv) / funded) : 1;
+    this.m.openInvestigations = openCases;
+    this.m.meanTimeToArrestDays = this.arrestAgeCount ? this.arrestAgeSum / this.arrestAgeCount / TICKS_PER_DAY : 0;
   }
 
   private snapshot() {
@@ -724,6 +776,10 @@ export class World {
       attackerRevenue: 0,
       extortionAttempts: 0,
       paidCount: 0,
+      day: 0,
+      fieldedCapability: 1,
+      openInvestigations: 0,
+      meanTimeToArrestDays: 0,
     };
   }
 

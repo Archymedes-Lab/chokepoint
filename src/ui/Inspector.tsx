@@ -46,6 +46,7 @@ export function Inspector({ world, selectedId }: { world: World; selectedId: num
             <Meter label="Conscience" v={a.morality} />
             <Meter label="Greed" v={a.greed / 1.4} />
             <Meter label="Heat / attention" v={a.heat} danger />
+            <Meter label="Case built" v={a.invProgress} danger />
 
             <div className="eyebrow mt" style={{ marginBottom: "0.3rem" }}>History</div>
             <div className="prof-grid">

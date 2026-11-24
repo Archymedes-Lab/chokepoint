@@ -65,6 +65,7 @@ export interface Agent {
   busts: number;
   lastEU: number; // last computed expected utility (for the inspector)
   safeHaven: boolean; // outside easy reach unless cooperation is high
+  invProgress: number; // 0..1 how far a case has been built against them
 }
 
 export interface TargetNode {
@@ -148,6 +149,11 @@ export interface Metrics {
   attackerRevenue: number; // cumulative $ actually paid to offenders
   extortionAttempts: number; // breaches that issued a demand
   paidCount: number; // breaches where the victim paid
+  // realistic response timescales (see docs/CALIBRATION.md)
+  day: number; // simulated day (1 tick = 6h)
+  fieldedCapability: number; // 0..1 enforcement capability actually stood up (lags funding)
+  openInvestigations: number; // active cases being built
+  meanTimeToArrestDays: number; // from first offence to capture
 }
 
 export interface WorldConfig {

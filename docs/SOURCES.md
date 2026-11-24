@@ -64,6 +64,7 @@ scale — see [CALIBRATION.md](CALIBRATION.md).
 - **Takedown effects / displacement** — Cybersecurity Dive, *Ransomware gangs capitalize on takedowns of competitors*; Operation Cronos / LockBit analyses.
 - **Deterrence** — Maimon, Howell & Burruss, *Restrictive deterrence and the scope of hackers' reoffending* (randomised field trials, Computers in Human Behavior, 2021).
 - **Harm scale** — Cybersecurity Ventures, *2025 Cybersecurity Almanac* ($10.5T in 2025; $12.2T by 2031).
+- **Response timescales** — IBM *Cost of a Data Breach 2025* (breach lifecycle ~241 days; recovery times); breach-filing analysis of 1,031 filings (ransomware detected ~19 days, malware ~93); FBI CFAA investigation timelines (1–3 years) and cybercrime prosecution-difficulty analyses; Operation Cronos / LockBit takedown timelines.
 
 ## Agent-based modelling for cybercrime policy
 

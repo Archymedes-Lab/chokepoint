@@ -111,6 +111,7 @@ export function Ecosystem() {
           <button className="btn" onClick={() => reset(pop)}>
             ↻ Reset
           </button>
+          <span className="badge mono" title="1 tick = 6 hours">Day {world.metrics().day}</span>
           <span className="eyebrow" style={{ marginLeft: 4 }}>colour by</span>
           <ToggleGroup aria-label="Colour offenders by" value={colorBy} onValueChange={(v) => setColorBy(v as ColorBy)}>
             {COLOR_MODES.map(([k, label]) => (

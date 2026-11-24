@@ -26,8 +26,28 @@ was validated. Figures are 2025–2026 unless noted.
 | **Deterrence is *restrictive*, not absolute** | Randomised field trials: certainty/messaging reduces the *scope* of reoffending, not the existence of offenders | Maimon, Howell & Burruss (2021) |
 | **Harm scale is national** | Global cybercrime cost ≈ $10.5T in 2025 (→$12.2T by 2031) | Cybersecurity Ventures |
 | **Ransomware dwell ≈ days** | Ransomware median dwell ~6 days; global median 11 days | Mandiant M-Trends 2025 |
+| **Detection latency in days** | Ransomware detected in ~19 days (loud); stealthier malware ~93 | Breach-filing analysis (1,031 filings) |
+| **Breach lifecycle ~241 days** | Mean time to identify + contain; global breach cost $4.44M | IBM 2025 |
+| **Investigations run 1–3 years; low clearance** | FBI CFAA hacking cases typically 1–3 years; cybercrime is uniquely hard to investigate/prosecute | FBI/legal analyses |
+| **Capability takes months to field** | Standing up enforcement/defence is slow; takedowns (Cronos) are multi-year ops | Operation Cronos analyses |
 
 Full citations in [SOURCES.md](SOURCES.md).
+
+### Response timescales (what makes the response realistically slow)
+
+Time is explicit: **1 tick = 6 hours** (≈1,460 ticks per simulated year), shown as a day
+clock. Three mechanisms make enforcement slow and leaky, as it is in reality:
+
+- **Policy lag.** A funded lever (the slider) is only *fielded* capability after a
+  first-order ramp of months — so moving a slider doesn't bite immediately. The sidebar
+  shows "fielded X% of funded".
+- **Investigations build over time.** A defender in contact accrues a *case* against an
+  offender; an arrest is attempted only once the case is built, and reach into safe havens
+  depends on cooperation. Most cases go cold — in-the-act capture is rare.
+- **Low clearance.** The net effect is a clearance rate in the single digits under weak
+  enforcement (validation: ~6.7%), rising to a minority even when arrests are heavily
+  funded — never approaching 100%. Mean time to arrest lands in months. Enforcement mostly
+  *deters*; it rarely incapacitates.
 
 ## 2. The core correction: harm ≠ attacker revenue
 

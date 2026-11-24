@@ -70,7 +70,10 @@ export function WorldControls({ world, onChange }: { world: World; onChange: () 
             <div className="heatbar">
               <span style={{ width: `${Math.min(100, budget * 100)}%`, background: over ? "var(--crit)" : "var(--ink)" }} />
             </div>
-            {over && <div className="hint" style={{ color: "var(--crit)", marginTop: 6 }}>Over budget — real authorities can't fund every lever at once. Prioritise.</div>}
+            <div className="hint" style={{ marginTop: 6 }}>
+              Fielded {Math.round(world.metrics().fieldedCapability * 100)}% of funded — capability lags by months.
+            </div>
+            {over && <div className="hint" style={{ color: "var(--crit)", marginTop: 4 }}>Over budget — real authorities can't fund every lever at once. Prioritise.</div>}
           </div>
           {IV_META.map((d) => (
             <div className="field" key={d.key}>

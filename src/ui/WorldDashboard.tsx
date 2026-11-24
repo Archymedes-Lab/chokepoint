@@ -68,6 +68,41 @@ export function WorldDashboard({ world }: { world: World }) {
 
       <section className="panel">
         <div className="hd">
+          <h2>Response Timescales</h2>
+          <span className="sub">how slow the response really is</span>
+        </div>
+        <div className="bd">
+          <div className="tiles">
+            <Big label="Sim day" value={`${m.day}`} tone="defender" />
+            <Big
+              label="Capability fielded"
+              value={`${Math.round(m.fieldedCapability * 100)}%`}
+              tone={m.fieldedCapability > 0.9 ? "advantage" : "gov"}
+            />
+            <Big label="Open cases" value={compact(m.openInvestigations)} tone="defender" />
+            <Big
+              label="Avg time to arrest"
+              value={m.meanTimeToArrestDays ? `${Math.round(m.meanTimeToArrestDays)}d` : "—"}
+              tone="gov"
+            />
+            <Big
+              label="Clearance rate"
+              value={m.breaches ? `${((m.arrestsMade / m.breaches) * 100).toFixed(1)}%` : "—"}
+              tone="gov"
+            />
+            <Big label="Total arrests" value={compact(m.arrestsMade)} tone="gov" />
+          </div>
+          <div className="note">
+            The response is slow and leaky on purpose. Ransomware is spotted in ~19 days, stealthier
+            malware ~93 (breach filings); investigations run <b>1–3 years</b> and most never clear;
+            and funded capability takes <b>months to field</b>. Enforcement mostly <i>deters</i> —
+            it rarely catches anyone in the act.
+          </div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="hd">
           <h2>Authority Advisor</h2>
           <span className="sub">the highest-leverage move, right now</span>
         </div>
