@@ -10,6 +10,7 @@ import {
 import type {
   Agent,
   Drivers,
+  Guardian,
   Interventions,
   Metrics,
   MotivationId,
@@ -17,6 +18,8 @@ import type {
   TargetNode,
   WorldConfig,
 } from "./types";
+
+type PulseKind = "breach" | "arrest" | "takedown" | "patch";
 
 const SECTOR_DEFS: Omit<Sector, "economy" | "nodes" | "loss" | "breaches">[] = [
   {
@@ -125,11 +128,13 @@ export class World {
     cooperation: 0.1,
     diversion: 0,
   };
-  pulses: { x: number; y: number; r: number; life: number; sector: number }[] = [];
+  guardians: Guardian[] = [];
+  pulses: { x: number; y: number; r: number; life: number; kind: PulseKind }[] = [];
   history: HistoryPoint[] = [];
-  events: { tick: number; text: string; kind: "breach" | "arrest" | "wave" | "policy" }[] = [];
+  events: { tick: number; text: string; kind: "breach" | "arrest" | "wave" | "policy" | "takedown" }[] = [];
 
   private nextId = 1;
+  private nextGid = 1;
   private recruitAcc = 0;
   private successMix: Record<MotivationId, number> = blankMix();
   private m: Metrics;
@@ -249,10 +254,143 @@ export class World {
       this.successMix[id] = this.successMix[id] * 0.985 + (decay[id] / Math.max(1, this.agents.length)) * 0.015;
 
     this.compact();
+    this.stepGuardians(iv);
+    this.stepGovernment(iv);
     this.stepEconomy();
     this.stepPulses();
     if (this.m.tick % 4 === 0) this.snapshot();
     this.recomputeLive();
+  }
+
+  /**
+   * Defender (SOC / blue-team) units. Their number scales with the defensive
+   * uplift, arrest, and cooperation investments — this is the *visible activity*
+   * of the defence. They hunt the noisiest active offenders and patch damaged
+   * nodes. Make these the blue dots moving in the world.
+   */
+  private stepGuardians(iv: Interventions) {
+    const W = this.cfg.width;
+    const H = this.cfg.height;
+    const target = Math.min(140, Math.round(6 + iv.hardening * 55 + iv.arrests * 35 + iv.cooperation * 14));
+    // grow / shrink the force toward the funded level
+    while (this.guardians.length < target) {
+      this.guardians.push({
+        id: this.nextGid++,
+        x: this.rng.next() * W,
+        y: this.rng.next() * H,
+        state: "patrol",
+        targetId: -1,
+        vx: 0,
+        vy: 0,
+      });
+    }
+    if (this.guardians.length > target) this.guardians.length = target;
+
+    for (const g of this.guardians) {
+      // currently pursuing someone?
+      let target_: Agent | null = null;
+      if (g.targetId >= 0) {
+        const t = this.agents.find((a) => a.id === g.targetId);
+        if (t && (t.state === "operate" || t.state === "travel")) target_ = t;
+        else g.targetId = -1;
+      }
+      // otherwise, look for the nearest noisy offender among a sample
+      if (!target_) {
+        let best = Infinity;
+        for (let k = 0; k < 24; k++) {
+          const a = this.agents[Math.floor(this.rng.next() * this.agents.length)];
+          if (!a || (a.state !== "operate" && a.state !== "travel") || a.heat < 0.18) continue;
+          const dd = (a.x - g.x) ** 2 + (a.y - g.y) ** 2;
+          if (dd < best && dd < 180 * 180) {
+            best = dd;
+            target_ = a;
+          }
+        }
+        if (target_) {
+          g.targetId = target_.id;
+          g.state = "respond";
+        }
+      }
+
+      if (target_) {
+        const dx = target_.x - g.x;
+        const dy = target_.y - g.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        const speed = 3.1; // faster than offenders — they close in
+        if (dist < 7) {
+          // contact: attempt to catch. Safe-haven offenders need cooperation.
+          let p = 0.35 + iv.arrests * 0.4 + target_.heat * 0.2;
+          if (target_.safeHaven) p *= 0.25 + 0.75 * iv.cooperation;
+          if (this.rng.chance(p)) {
+            target_.state = "jailed";
+            target_.cooldown = 140 + Math.floor((0.5 + iv.cooperation) * 200);
+            target_.heat = 0;
+            this.m.arrestsMade++;
+            this.m.defenderEvictions++;
+            this.pulses.push({ x: target_.x, y: target_.y, r: 0, life: 1, kind: "arrest" });
+          }
+          g.targetId = -1;
+          g.state = "patrol";
+        } else {
+          g.x += (dx / dist) * speed;
+          g.y += (dy / dist) * speed;
+        }
+      } else {
+        // patrol: drift, and occasionally patch a nearby damaged node
+        g.state = "patrol";
+        g.vx = g.vx * 0.9 + (this.rng.next() - 0.5) * 1.2;
+        g.vy = g.vy * 0.9 + (this.rng.next() - 0.5) * 1.2;
+        g.x = Math.max(0, Math.min(W, g.x + g.vx));
+        g.y = Math.max(0, Math.min(H, g.y + g.vy));
+        if (this.rng.chance(0.03)) this.patchNear(g);
+      }
+    }
+  }
+
+  private patchNear(g: Guardian) {
+    // find the closest sector and a weak node in it, and harden it a little
+    let bestSec = -1;
+    let bestD = Infinity;
+    this.sectors.forEach((s, i) => {
+      const cx = (s.region.x + s.region.w / 2) * this.cfg.width;
+      const cy = (s.region.y + s.region.h / 2) * this.cfg.height;
+      const dd = (cx - g.x) ** 2 + (cy - g.y) ** 2;
+      if (dd < bestD) {
+        bestD = dd;
+        bestSec = i;
+      }
+    });
+    if (bestSec < 0) return;
+    const sec = this.sectors[bestSec];
+    const node = sec.nodes.reduce((a, b) => (a.health < b.health || a.defense < b.defense ? a : b));
+    if (node.defense < 0.5) {
+      node.defense = Math.min(0.5, node.defense + 0.05);
+      this.m.patches++;
+      this.pulses.push({ x: node.x, y: node.y, r: 0, life: 0.7, kind: "patch" });
+    }
+  }
+
+  /**
+   * Government infrastructure strikes. When the takedown lever is funded,
+   * periodic operations hit high-value nodes (crypto/critical first), harden
+   * them, and post to the investigator feed — the visible hand of the state.
+   */
+  private stepGovernment(iv: Interventions) {
+    if (iv.takedown <= 0) return;
+    const period = Math.max(6, Math.round(40 - iv.takedown * 30));
+    if (this.m.tick % period !== 0) return;
+    const prefer = ["crypto", "critical", "finance"];
+    const si = this.sectors.findIndex((s) => s.id === prefer[Math.floor(this.rng.next() * prefer.length)]);
+    const sec = this.sectors[si] ?? this.sectors[0];
+    const hits = 1 + Math.floor(iv.takedown * 3);
+    for (let i = 0; i < hits; i++) {
+      const node = sec.nodes[Math.floor(this.rng.next() * sec.nodes.length)];
+      node.defense = Math.min(0.6, node.defense + 0.08);
+      this.pulses.push({ x: node.x, y: node.y, r: 0, life: 1, kind: "takedown" });
+    }
+    this.m.takedownOps++;
+    if (this.rng.chance(0.3))
+      this.pushEvent("takedown", `Government takedown operation struck ${sec.name} infrastructure.`);
   }
 
   private recruit(d: Drivers) {
@@ -416,7 +554,7 @@ export class World {
       this.m.breaches++;
       this.m.publicTrust = Math.max(0, this.m.publicTrust - sev * sec.harm * 0.6);
       this.successMix[a.mot] = Math.min(1, this.successMix[a.mot] + 0.05);
-      this.pulses.push({ x: node.x, y: node.y, r: 0, life: 1, sector: a.targetSector });
+      this.pulses.push({ x: node.x, y: node.y, r: 0, life: 1, kind: "breach" });
       if (loss > 400_000)
         this.pushEvent(
           "breach",
@@ -440,6 +578,7 @@ export class World {
       a.cooldown = 120 + Math.floor((0.5 + iv.cooperation) * 200) + (a.mot === "professional" ? 150 : 0);
       a.heat = 0;
       this.m.arrestsMade++;
+      this.pulses.push({ x: a.x, y: a.y, r: 0, life: 1, kind: "arrest" });
       if (a.wealth > 500_000 || a.mot === "professional")
         this.pushEvent("arrest", `Authorities arrested a ${MOTIVATIONS[a.mot].name} offender.`);
       return true;
@@ -514,7 +653,7 @@ export class World {
     return false;
   }
 
-  private pushEvent(kind: "breach" | "arrest" | "wave" | "policy", text: string) {
+  private pushEvent(kind: "breach" | "arrest" | "wave" | "policy" | "takedown", text: string) {
     this.events.unshift({ tick: this.m.tick, text, kind });
     if (this.events.length > 40) this.events.pop();
   }
@@ -531,6 +670,7 @@ export class World {
     this.m.activeOps = active;
     this.m.gdpIndex = this.sectors.reduce((s, sec) => s + sec.economy * sec.gdpWeight, 0);
     this.m.budgetUsed = this.budgetUsed();
+    this.m.guardians = this.guardians.length;
   }
 
   private snapshot() {
@@ -563,6 +703,10 @@ export class World {
       desistances: 0,
       recruited: 0,
       budgetUsed: 0,
+      guardians: 0,
+      defenderEvictions: 0,
+      patches: 0,
+      takedownOps: 0,
     };
   }
 

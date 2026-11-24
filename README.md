@@ -42,6 +42,9 @@ motivation and a disposition, move through it and choose targets by **expected u
 - **External causes.** Sliders for economic strain, tooling availability, perceived
   impunity, cash-out ease, and social contagion — the forces that grow or shrink the
   population.
+- **Defenders and the state, visible.** SOC / blue-team units (blue) hunt the noisiest
+  offenders and patch weak targets; government takedowns (amber) strike infrastructure.
+  Fund the levers and more of them appear on the board.
 - **Authority levers on a limited budget.** Arrests, infrastructure takedowns, cash-out
   disruption, defensive uplift, international cooperation, and upstream diversion — you
   can't fund them all, so you must prioritise.

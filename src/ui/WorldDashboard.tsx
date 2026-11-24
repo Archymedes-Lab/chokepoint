@@ -1,6 +1,7 @@
 import type { World, HistoryPoint } from "../world/model";
 import { money } from "../world/model";
 import { MOTIVATIONS, MOTIVATION_IDS } from "../world/psychology";
+import { ScrollArea } from "./radix";
 
 export function WorldDashboard({ world }: { world: World }) {
   const m = world.metrics();
@@ -26,6 +27,30 @@ export function WorldDashboard({ world }: { world: World }) {
             <Big label="Breaches" value={compact(m.breaches)} />
           </div>
           <Spark history={world.history} />
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="hd">
+          <h2>Defence &amp; Government Activity</h2>
+          <span className="sub">the blue team and the state, at work</span>
+        </div>
+        <div className="bd">
+          <div className="tiles">
+            <Big label="SOC units" value={compact(m.guardians)} tone="defender" />
+            <Big label="Active offenders" value={compact(m.population)} tone="attacker" />
+            <Big label="Defender captures" value={compact(m.defenderEvictions)} tone="defender" />
+            <Big label="Nodes patched" value={compact(m.patches)} tone="defender" />
+            <Big label="Gov. takedowns" value={compact(m.takedownOps)} tone="gov" />
+            <Big label="Total arrests" value={compact(m.arrestsMade)} tone="gov" />
+            <Big label="Desistances" value={compact(m.desistances)} tone="advantage" />
+            <Big label="Recruited" value={compact(m.recruited)} tone="attacker" />
+          </div>
+          <div className="note">
+            Defenders (blue units) hunt the noisiest offenders and patch weak targets; government
+            takedowns (amber) strike infrastructure. Fund <b>Defensive uplift</b>, <b>Arrest certainty</b>,
+            and <b>Cooperation</b> to field more of them — and watch captures rise against the population.
+          </div>
         </div>
       </section>
 
@@ -84,23 +109,25 @@ export function WorldDashboard({ world }: { world: World }) {
           <span className="sub">notable events</span>
         </div>
         <div className="bd">
-          <div className="feed">
-            {world.events.length === 0 && <div className="muted" style={{ fontSize: "0.8rem" }}>No major events yet — run the simulation.</div>}
-            {world.events.map((e, i) => (
-              <div className={`feed-row k-${e.kind}`} key={`${e.tick}-${i}`}>
-                <span className="feed-dot" />
-                <span className="feed-text">{e.text}</span>
-                <span className="feed-t">t{e.tick}</span>
-              </div>
-            ))}
-          </div>
+          <ScrollArea maxHeight={240}>
+            <div className="feed">
+              {world.events.length === 0 && <div className="muted" style={{ fontSize: 12 }}>No major events yet — run the simulation.</div>}
+              {world.events.map((e, i) => (
+                <div className={`feed-row k-${e.kind}`} key={`${e.tick}-${i}`}>
+                  <span className="feed-dot" />
+                  <span className="feed-text">{e.text}</span>
+                  <span className="feed-t">t{e.tick}</span>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
       </section>
     </>
   );
 }
 
-function Big({ label, value, tone }: { label: string; value: string; tone?: "attacker" | "advantage" }) {
+function Big({ label, value, tone }: { label: string; value: string; tone?: "attacker" | "advantage" | "defender" | "gov" }) {
   return (
     <div className={`tile ${tone ?? ""}`}>
       <div className="t-lbl">{label}</div>

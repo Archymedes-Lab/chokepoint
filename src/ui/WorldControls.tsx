@@ -1,9 +1,9 @@
 import type { World } from "../world/model";
 import type { Drivers, Interventions } from "../world/types";
-import { Slider } from "./components";
+import { Slider, Info } from "./radix";
 
 const DRIVER_META: { key: keyof Drivers; label: string; hint: string }[] = [
-  { key: "economicStrain", label: "Economic strain", hint: "Hardship & unemployment — feeds recruitment and risk-taking." },
+  { key: "economicStrain", label: "Economic strain", hint: "Hardship and unemployment — feeds recruitment and risk-taking." },
   { key: "toolingAvailability", label: "Tooling availability", hint: "Cheap RaaS / kits — lowers the skill barrier to entry." },
   { key: "perceivedImpunity", label: "Perceived impunity", hint: "Belief you won't be caught — drives entry and boldness." },
   { key: "cryptoLiquidity", label: "Cash-out ease", hint: "How easily proceeds can be realised and laundered." },
@@ -11,7 +11,7 @@ const DRIVER_META: { key: keyof Drivers; label: string; hint: string }[] = [
 ];
 
 const IV_META: { key: keyof Interventions; label: string; hint: string }[] = [
-  { key: "arrests", label: "Arrest certainty", hint: "Raise the probability of being caught — deters and incapacitates." },
+  { key: "arrests", label: "Arrest certainty", hint: "Raise the probability of being caught — deters and incapacitates offenders." },
   { key: "takedown", label: "Infrastructure takedowns", hint: "Seize tooling supply — raises the skill barrier at the source." },
   { key: "cashoutDisruption", label: "Cash-out disruption", hint: "Seize mixers / complicit exchanges — cuts realised reward." },
   { key: "hardening", label: "Defensive uplift", hint: "Fund sector-wide hardening — fewer suitable targets (watch displacement)." },
@@ -19,13 +19,7 @@ const IV_META: { key: keyof Interventions; label: string; hint: string }[] = [
   { key: "diversion", label: "Diversion programs", hint: "Address root causes — shrink the inflow of new offenders." },
 ];
 
-export function WorldControls({
-  world,
-  onChange,
-}: {
-  world: World;
-  onChange: () => void;
-}) {
+export function WorldControls({ world, onChange }: { world: World; onChange: () => void }) {
   const budget = world.budgetUsed();
   const over = budget > 1;
 
@@ -34,26 +28,29 @@ export function WorldControls({
       <section className="panel">
         <div className="hd">
           <h2>External Causes</h2>
-          <span className="sub">why offending rises & falls</span>
+          <span className="sub">why offending rises &amp; falls</span>
         </div>
         <div className="bd">
           {DRIVER_META.map((d) => (
             <div className="field" key={d.key}>
               <label>
-                {d.label}
+                <span className="label-wrap">
+                  {d.label}
+                  <Info>{d.hint}</Info>
+                </span>
                 <span className="val">{Math.round(world.drivers[d.key] * 100)}</span>
               </label>
               <Slider
+                aria-label={d.label}
                 min={0}
                 max={1}
                 step={0.05}
                 value={world.drivers[d.key]}
-                onChange={(v) => {
+                onValueChange={(v) => {
                   world.drivers[d.key] = v;
                   onChange();
                 }}
               />
-              <div className="hint">{d.hint}</div>
             </div>
           ))}
         </div>
@@ -68,30 +65,33 @@ export function WorldControls({
           <div className={`budget ${over ? "over" : ""}`}>
             <div className="budget-row">
               <span className="eyebrow">Enforcement budget</span>
-              <span className="mono">{Math.round(budget * 100)}%</span>
+              <span className="mono" style={{ fontSize: 12 }}>{Math.round(budget * 100)}%</span>
             </div>
             <div className="heatbar">
-              <span style={{ width: `${Math.min(100, budget * 100)}%`, background: over ? "var(--crit)" : "var(--accent)" }} />
+              <span style={{ width: `${Math.min(100, budget * 100)}%`, background: over ? "var(--crit)" : "var(--ink)" }} />
             </div>
-            {over && <div className="hint" style={{ color: "var(--crit)" }}>Over budget — real authorities can't fund every lever at once. Prioritise.</div>}
+            {over && <div className="hint" style={{ color: "var(--crit)", marginTop: 6 }}>Over budget — real authorities can't fund every lever at once. Prioritise.</div>}
           </div>
           {IV_META.map((d) => (
             <div className="field" key={d.key}>
               <label>
-                {d.label}
+                <span className="label-wrap">
+                  {d.label}
+                  <Info>{d.hint}</Info>
+                </span>
                 <span className="val">{Math.round(world.interventions[d.key] * 100)}</span>
               </label>
               <Slider
+                aria-label={d.label}
                 min={0}
                 max={1}
                 step={0.05}
                 value={world.interventions[d.key]}
-                onChange={(v) => {
+                onValueChange={(v) => {
                   world.interventions[d.key] = v;
                   onChange();
                 }}
               />
-              <div className="hint">{d.hint}</div>
             </div>
           ))}
         </div>

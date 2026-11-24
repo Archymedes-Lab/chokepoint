@@ -4,10 +4,18 @@ import { drawWorld } from "../world/render";
 import { WorldControls } from "./WorldControls";
 import { WorldDashboard } from "./WorldDashboard";
 import { Inspector } from "./Inspector";
+import { ToggleGroup, ToggleItem, Switch, Slider } from "./radix";
 
 const WORLD_W = 1000;
 const WORLD_H = 620;
 const SPEEDS = [1, 2, 4, 8];
+const OFFENDER_LEGEND: [string, string][] = [
+  ["economic", "#f0a33c"],
+  ["professional", "#f2695e"],
+  ["ideological", "#7aa0ff"],
+  ["thrill", "#35c48b"],
+  ["opportunistic", "#9aa7b8"],
+];
 
 export function Ecosystem() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -93,33 +101,32 @@ export function Ecosystem() {
           <button className="btn primary" onClick={() => setRunning((r) => !r)}>
             {running ? "❚❚ Pause" : "▶ Play"}
           </button>
-          <div className="seg">
+          <ToggleGroup aria-label="Speed" value={String(speed)} onValueChange={(v) => setSpeed(Number(v))}>
             {SPEEDS.map((s) => (
-              <button key={s} className={`seg-b ${speed === s ? "on" : ""}`} onClick={() => setSpeed(s)}>
+              <ToggleItem key={s} value={String(s)}>
                 {s}×
-              </button>
+              </ToggleItem>
             ))}
-          </div>
+          </ToggleGroup>
           <button className="btn" onClick={() => reset(pop)}>
             ↻ Reset
           </button>
           <label className="toggle">
-            <input type="checkbox" checked={showHeat} onChange={(e) => setShowHeat(e.target.checked)} />
+            <Switch checked={showHeat} onCheckedChange={setShowHeat} aria-label="Heat view" />
             Heat view
           </label>
           <div className="pop-field">
-            <span className="muted" style={{ fontSize: "0.72rem" }}>seed pop</span>
-            <input
-              type="range"
+            <span className="eyebrow">seed pop</span>
+            <Slider
+              aria-label="Seed population"
               min={100}
               max={3000}
               step={100}
               value={pop}
-              onChange={(e) => setPop(Number(e.target.value))}
-              onMouseUp={() => reset(pop)}
-              onTouchEnd={() => reset(pop)}
+              onValueChange={setPop}
+              onCommit={(v) => reset(v)}
             />
-            <span className="mono" style={{ fontSize: "0.72rem" }}>{pop}</span>
+            <span className="mono" style={{ fontSize: 12 }}>{pop}</span>
           </div>
         </div>
 
@@ -134,18 +141,15 @@ export function Ecosystem() {
         </div>
 
         <div className="legend-bar">
-          <span className="muted" style={{ fontSize: "0.72rem" }}>offenders:</span>
-          {[
-            ["economic", "#f0a33c"],
-            ["professional", "#f2695e"],
-            ["ideological", "#7aa0ff"],
-            ["thrill", "#35c48b"],
-            ["opportunistic", "#9aa7b8"],
-          ].map(([name, col]) => (
+          <span className="eyebrow">offenders</span>
+          {OFFENDER_LEGEND.map(([name, col]) => (
             <span key={name} className="legend-item">
               <i style={{ background: col }} /> {name}
             </span>
           ))}
+          <span className="eyebrow" style={{ marginLeft: 8 }}>response</span>
+          <span className="legend-item"><i style={{ background: "#4b8dff" }} /> defenders (SOC)</span>
+          <span className="legend-item"><i style={{ background: "#e3a53a" }} /> gov. takedown</span>
         </div>
 
         <Inspector world={world} selectedId={selectedId} />

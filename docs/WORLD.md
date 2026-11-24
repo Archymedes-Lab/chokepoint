@@ -109,6 +109,23 @@ Interventions feed back into the **effective drivers** (e.g. arrests lower perce
 impunity; takedowns lower tooling availability; cash-out disruption lowers crypto
 liquidity), which is how enforcement changes the conditions that produce offenders.
 
+### Defender & government units (visible activity)
+
+The response isn't abstract — you watch it operate:
+
+- **Defender / SOC units** (blue) are fielded in proportion to the *defensive uplift*,
+  *arrest certainty*, and *cooperation* investments. They hunt the noisiest active
+  offenders, close in faster than offenders move, and attempt a capture on contact
+  (harder against safe-haven offenders unless cooperation is funded); between pursuits
+  they **patch** weak nodes, raising local defence. Their captures, and the nodes they
+  patch, are tracked in the Defence & Government Activity panel.
+- **Government takedown strikes** (amber) fire periodically when the *takedown* lever is
+  funded, hitting high-value infrastructure (crypto, critical, finance first), hardening
+  those nodes, and posting to the investigator feed.
+
+So the same levers that shift the *conditions* also put more blue units and more strikes
+on the board — the visible hand of the defence and the state.
+
 ## 6. Dynamics each tick
 
 1. **Recruitment** — new agents spawn at a rate driven by strain, tooling, impunity, and

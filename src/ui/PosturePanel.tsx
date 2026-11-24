@@ -1,5 +1,5 @@
 import { ARCHETYPES, type Archetype, type Control, type Posture } from "../sim";
-import { Switch, Slider } from "./components";
+import { Switch, Slider } from "./radix";
 
 const CATEGORY_LABELS: Record<Control["category"], string> = {
   identity: "Identity",
@@ -103,45 +103,45 @@ export function PosturePanel({
           </div>
 
           <div className="field">
-            <label htmlFor="tv">
+            <label>
               Target value (what's at stake)
               <span className="val">{fmtTV(posture.targetValue)}</span>
             </label>
             <Slider
-              id="tv"
+              aria-label="Target value"
               min={100_000}
               max={50_000_000}
               step={100_000}
               value={posture.targetValue}
-              onChange={(v) => onPosture({ ...posture, targetValue: v })}
+              onValueChange={(v) => onPosture({ ...posture, targetValue: v })}
             />
           </div>
           <div className="field">
-            <label htmlFor="resp">
+            <label>
               SOC responsiveness
               <span className="val">{pct(posture.responsiveness)}</span>
             </label>
             <Slider
-              id="resp"
+              aria-label="SOC responsiveness"
               min={0.1}
               max={0.95}
               step={0.05}
               value={posture.responsiveness}
-              onChange={(v) => onPosture({ ...posture, responsiveness: v })}
+              onValueChange={(v) => onPosture({ ...posture, responsiveness: v })}
             />
           </div>
           <div className="field">
-            <label htmlFor="thr">
+            <label>
               Detection sensitivity
               <span className="val">{pct(1 - posture.responseThreshold)}</span>
             </label>
             <Slider
-              id="thr"
+              aria-label="Detection sensitivity"
               min={0.2}
               max={0.85}
               step={0.02}
               value={1 - posture.responseThreshold}
-              onChange={(v) => onPosture({ ...posture, responseThreshold: 1 - v })}
+              onValueChange={(v) => onPosture({ ...posture, responseThreshold: 1 - v })}
             />
           </div>
 
@@ -153,8 +153,8 @@ export function PosturePanel({
                   <div className="row">
                     <Switch
                       checked={c.enabled}
-                      onChange={(v) => setControl(c.id, { enabled: v })}
-                      label={c.name}
+                      onCheckedChange={(v) => setControl(c.id, { enabled: v })}
+                      aria-label={c.name}
                     />
                     <span className="name">{c.name}</span>
                     <span className="effort">{c.effort}</span>
@@ -162,11 +162,12 @@ export function PosturePanel({
                   {c.enabled && (
                     <div className="cov">
                       <Slider
+                        aria-label={`${c.name} coverage`}
                         min={0.1}
                         max={1}
                         step={0.05}
                         value={c.coverage}
-                        onChange={(v) => setControl(c.id, { coverage: v })}
+                        onValueChange={(v) => setControl(c.id, { coverage: v })}
                       />
                       <span>{pct(c.coverage)}</span>
                     </div>

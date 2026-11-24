@@ -1,51 +1,5 @@
 import type { ReactNode } from "react";
 
-export function Switch({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  label?: string;
-}) {
-  return (
-    <label className="switch" aria-label={label}>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span className="track" />
-      <span className="thumb" />
-    </label>
-  );
-}
-
-export function Slider({
-  value,
-  min,
-  max,
-  step,
-  onChange,
-  id,
-}: {
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  onChange: (v: number) => void;
-  id?: string;
-}) {
-  return (
-    <input
-      id={id}
-      type="range"
-      min={min}
-      max={max}
-      step={step}
-      value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
-    />
-  );
-}
-
 export function Tile({
   label,
   value,
@@ -55,7 +9,7 @@ export function Tile({
   label: string;
   value: ReactNode;
   sub?: string;
-  tone?: "attacker" | "advantage";
+  tone?: "attacker" | "advantage" | "defender" | "gov";
 }) {
   return (
     <div className={`tile ${tone ?? ""}`}>

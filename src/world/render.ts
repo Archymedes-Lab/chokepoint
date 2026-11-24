@@ -82,9 +82,15 @@ export function drawWorld(ctx: CanvasRenderingContext2D, w: World, view: ViewSta
     }
   }
 
-  // damage pulses
+  // event pulses — breach (red), arrest (blue), takedown (amber), patch (green)
+  const PULSE: Record<string, string> = {
+    breach: "#ef4d4d",
+    arrest: "#4b8dff",
+    takedown: "#e3a53a",
+    patch: "#3cc07a",
+  };
   for (const p of w.pulses) {
-    ctx.strokeStyle = hexA("#f2695e", p.life);
+    ctx.strokeStyle = hexA(PULSE[p.kind] ?? "#ef4d4d", p.life);
     ctx.lineWidth = 1;
     const r = p.r;
     ctx.strokeRect(Math.round(p.x - r), Math.round(p.y - r), Math.round(r * 2), Math.round(r * 2));
@@ -102,6 +108,23 @@ export function drawWorld(ctx: CanvasRenderingContext2D, w: World, view: ViewSta
     }
     ctx.fillStyle = view.showHeat ? heatColor(a.heat) : col;
     ctx.fillRect(Math.round(a.x) - (size >> 1), Math.round(a.y) - (size >> 1), size, size);
+  }
+
+  // defender (SOC / blue-team) units — blue squares with a white core; a ring
+  // while actively responding to an offender.
+  for (const g of w.guardians) {
+    const gx = Math.round(g.x);
+    const gy = Math.round(g.y);
+    if (g.state === "respond") {
+      ctx.strokeStyle = hexA("#4b8dff", 0.6);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(gx - 4, gy - 4, 8, 8);
+    }
+    ctx.fillStyle = "#4b8dff";
+    ctx.fillRect(gx - 2, gy - 2, 4, 4);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(gx, gy - 1, 1, 1);
+    ctx.fillRect(gx - 1, gy, 1, 1);
   }
 
   // selected agent

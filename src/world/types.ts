@@ -111,6 +111,17 @@ export interface Interventions {
   diversion: number; // address root causes / recruitment (desistance programs)
 }
 
+/** A defender (SOC / blue-team) unit operating in the landscape. */
+export interface Guardian {
+  id: number;
+  x: number;
+  y: number;
+  state: "patrol" | "respond";
+  targetId: number; // attacker being pursued, -1 none
+  vx: number;
+  vy: number;
+}
+
 export interface Metrics {
   tick: number;
   population: number;
@@ -124,10 +135,15 @@ export interface Metrics {
   gdpIndex: number; // 0..100 weighted economy health
   publicTrust: number; // 0..100
   breaches: number; // cumulative
-  arrestsMade: number; // cumulative
+  arrestsMade: number; // cumulative (all captures)
   desistances: number; // cumulative
   recruited: number; // cumulative
   budgetUsed: number; // 0..1 of authority budget
+  // defender & government activity
+  guardians: number; // active SOC / blue-team units
+  defenderEvictions: number; // cumulative captures made by guardians
+  patches: number; // cumulative node hardenings by defenders
+  takedownOps: number; // cumulative government infrastructure strikes
 }
 
 export interface WorldConfig {

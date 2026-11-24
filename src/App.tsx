@@ -5,10 +5,9 @@ import { PosturePanel } from "./ui/PosturePanel";
 import { SingleRun } from "./ui/SingleRun";
 import { MonteCarlo } from "./ui/MonteCarlo";
 import { Ecosystem } from "./ui/Ecosystem";
+import { Tabs, TabsList, Tab, TabPanel, TooltipProvider } from "./ui/radix";
 
 type Mode = "eco" | "micro";
-type MicroTab = "single" | "batch";
-
 const THEME_KEY = "chokepoint-theme";
 
 export default function App() {
@@ -35,56 +34,61 @@ export default function App() {
   }, [theme]);
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div className="topbar-in">
-          <div className="brand">
-            <svg className="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-              <path
-                d="M16 2 4 7v8c0 7 5 12 12 15 7-3 12-8 12-15V7L16 2Z"
-                stroke="var(--advantage)"
-                strokeWidth="2"
-                fill="color-mix(in srgb, var(--advantage) 12%, transparent)"
-              />
-              <path d="M11 16h10M16 11l5 5-5 5" stroke="var(--attacker)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <h1>Chokepoint</h1>
-            <span className="ver">v0.2</span>
-          </div>
-          <div className="mode-switch">
-            <button className={`mode-b ${mode === "eco" ? "on" : ""}`} onClick={() => setMode("eco")}>
-              Ecosystem
+    <TooltipProvider>
+      <Tabs className="app" value={mode} onValueChange={(v) => setMode(v as Mode)}>
+        <header className="topbar">
+          <div className="topbar-in">
+            <div className="brand">
+              <svg className="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <path
+                  d="M16 2 4 7v8c0 7 5 12 12 15 7-3 12-8 12-15V7L16 2Z"
+                  stroke="var(--good)"
+                  strokeWidth="2"
+                  fill="none"
+                />
+                <path d="M11 16h10M16 11l5 5-5 5" stroke="var(--harm)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <h1>Chokepoint</h1>
+              <span className="ver">v0.3</span>
+            </div>
+            <div className="mode-tabs">
+              <TabsList aria-label="Model">
+                <Tab value="eco">Ecosystem</Tab>
+                <Tab value="micro">Encounter model</Tab>
+              </TabsList>
+            </div>
+            <span className="badge">Defensive · Simulation</span>
+            <div className="spacer" />
+            <button
+              className="icon-btn"
+              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+              aria-label="Toggle colour theme"
+            >
+              {theme === "light" ? "Dark" : "Light"}
             </button>
-            <button className={`mode-b ${mode === "micro" ? "on" : ""}`} onClick={() => setMode("micro")}>
-              Encounter model
-            </button>
           </div>
-          <span className="badge">Defensive · Simulation</span>
-          <div className="spacer" />
-          <button
-            className="icon-btn"
-            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-            aria-label="Toggle theme"
-          >
-            {theme === "light" ? "◐ Dark" : "◑ Light"}
-          </button>
-        </div>
-      </header>
+        </header>
 
-      {mode === "eco" ? <Ecosystem /> : <MicroApp />}
+        <TabPanel value="eco">
+          <Ecosystem />
+        </TabPanel>
+        <TabPanel value="micro">
+          <MicroApp />
+        </TabPanel>
 
-      <footer className="foot">
-        <div className="foot-in">
-          <div>
-            <b>Chokepoint</b> is an abstract, criminological model for defensive planning, policy
-            analysis, and education. It simulates offender <i>motivation, decisions, and population
-            dynamics</i> — never real-world actions — and contains no operational attack detail.
-            Parameters are calibrated from public research; see <code>docs/</code>.
+        <footer className="foot">
+          <div className="foot-in">
+            <div>
+              <b>Chokepoint</b> is an abstract, criminological model for defensive planning, policy
+              analysis, and education. It simulates offender and defender <i>decisions and population
+              dynamics</i> — never real-world actions — and contains no operational attack detail.
+              Parameters are calibrated from public research; see <code>docs/</code>.
+            </div>
+            <div className="muted">Apache-2.0 · TLP:CLEAR · for defenders, authorities, and researchers.</div>
           </div>
-          <div className="muted">Apache-2.0 · TLP:CLEAR · for defenders, authorities, and researchers.</div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </Tabs>
+    </TooltipProvider>
   );
 }
 
@@ -92,7 +96,7 @@ export default function App() {
 function MicroApp() {
   const [agent, setAgent] = useState<Archetype>(ARCHETYPES[0]);
   const [posture, setPosture] = useState<Posture>(() => defaultPosture());
-  const [tab, setTab] = useState<MicroTab>("single");
+  const [tab, setTab] = useState<string>("single");
   const [seed, setSeed] = useState(() => (Math.random() * 1e9) | 0);
   const result = useSingleRun(agent, posture, seed);
 
@@ -102,24 +106,25 @@ function MicroApp() {
         <PosturePanel agent={agent} onAgent={setAgent} posture={posture} onPosture={setPosture} />
       </aside>
       <div>
-        <div className="note" style={{ marginBottom: "1rem" }}>
+        <div className="note" style={{ marginBottom: 16 }}>
           <b>Encounter model.</b> Zoom from the whole ecosystem down to a single organisation facing a
           single adversary: step through one intrusion, or run thousands to find which controls break
           the chain. The forensic companion to the population view.
         </div>
-        <div className="tabs">
-          <button className={`tab ${tab === "single" ? "on" : ""}`} onClick={() => setTab("single")}>
-            Single run
-          </button>
-          <button className={`tab ${tab === "batch" ? "on" : ""}`} onClick={() => setTab("batch")}>
-            Monte Carlo
-          </button>
-        </div>
-        {tab === "single" ? (
-          <SingleRun result={result} agent={agent} posture={posture} onReseed={() => setSeed((Math.random() * 1e9) | 0)} />
-        ) : (
-          <MonteCarlo agent={agent} posture={posture} />
-        )}
+        <Tabs value={tab} onValueChange={setTab}>
+          <div style={{ marginBottom: 16, borderBottom: "1px solid var(--line)" }}>
+            <TabsList aria-label="Encounter view">
+              <Tab value="single">Single run</Tab>
+              <Tab value="batch">Monte Carlo</Tab>
+            </TabsList>
+          </div>
+          <TabPanel value="single">
+            <SingleRun result={result} agent={agent} posture={posture} onReseed={() => setSeed((Math.random() * 1e9) | 0)} />
+          </TabPanel>
+          <TabPanel value="batch">
+            <MonteCarlo agent={agent} posture={posture} />
+          </TabPanel>
+        </Tabs>
       </div>
     </main>
   );
