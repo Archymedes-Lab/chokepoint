@@ -93,6 +93,7 @@ export interface Sector {
   economy: number; // 0..100 current health
   baseDefense: number; // baseline hardening (raised by campaigns)
   harm: number; // weight: how much societal harm an attack here causes
+  payPropensity: number; // sector's relative willingness to pay a ransom (1 = baseline)
   coupling: Partial<Record<string, number>>; // drag onto other sectors
   nodes: TargetNode[];
   // live accumulators
@@ -107,6 +108,7 @@ export interface Drivers {
   perceivedImpunity: number; // 0..1 belief you won't be caught → entry & risk
   cryptoLiquidity: number; // 0..1 ease of realising/cashing out proceeds
   contagion: number; // 0..1 how strongly success recruits imitators
+  aiEnabled: number; // 0..1 AI-assisted attacks — lowers the skill barrier and scales volume
 }
 
 /** Authority interventions — the levers. Each 0..1 intensity, each a cost. */

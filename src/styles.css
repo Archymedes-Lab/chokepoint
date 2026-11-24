@@ -633,3 +633,7 @@ select {
 a.wire-title { border-bottom: none; }
 a.wire-title:hover { text-decoration: underline; }
 .wire-meta { font-family: var(--mono); font-size: 10.5px; color: var(--faint); margin-top: 3px; }
+
+/* scenario selector (inline, auto width) */
+.scenario-select { width: auto; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line-2); font-family: var(--font); font-size: 12px; padding: 4px 8px; cursor: pointer; }
+.scenario-select:hover { border-color: var(--ink); }

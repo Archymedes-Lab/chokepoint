@@ -8,6 +8,7 @@ const DRIVER_META: { key: keyof Drivers; label: string; hint: string }[] = [
   { key: "perceivedImpunity", label: "Perceived impunity", hint: "Belief you won't be caught — drives entry and boldness." },
   { key: "cryptoLiquidity", label: "Cash-out ease", hint: "How easily proceeds can be realised and laundered." },
   { key: "contagion", label: "Social contagion", hint: "How strongly visible success recruits imitators." },
+  { key: "aiEnabled", label: "AI-enabled attacks", hint: "Generative AI lowers the skill barrier and scales phishing/recon — swelling the low-skill inflow (IBM 2025)." },
 ];
 
 const IV_META: { key: keyof Interventions; label: string; hint: string }[] = [

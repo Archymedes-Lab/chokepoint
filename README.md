@@ -64,6 +64,9 @@ motivation and a disposition, move through it and choose targets by **expected u
   included Cloudflare Worker (`worker/`) for a reliable live feed (no API key ever in the repo).
 - **Damage in many dimensions.** Direct loss, recovery cost, GDP health, public trust,
   downtime, records stolen, victims, breaches — rippling across interdependent sectors.
+- **Scenario presets.** Load named policy worlds — *2025 Baseline*, *Economic Downturn*,
+  *Cheap-AI Surge*, *Payment Ban Enacted*, *Coordinated Crackdown*, *Resilient Nation*,
+  *Safe-Haven Impunity* — and compare their steady states side by side.
 - **An advisor that decomplexifies.** It reads the live population and names the
   highest-leverage move, and why — the right lever changes as the population changes.
 - **Forensic inspection.** Click any offender to read their profile, history, and the

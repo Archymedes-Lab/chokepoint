@@ -8,6 +8,7 @@ import { MapKey, worldRead } from "./MapKey";
 import { ThreatWire } from "./ThreatWire";
 import { ToggleGroup, ToggleItem, Slider } from "./radix";
 import type { ColorBy } from "../world/render";
+import { SCENARIOS } from "../world/scenarios";
 
 const WORLD_W = 1000;
 const WORLD_H = 620;
@@ -33,6 +34,7 @@ export function Ecosystem() {
   const [pop, setPop] = useState(600);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [colorBy, setColorBy] = useState<ColorBy>("motivation");
+  const [scenario, setScenario] = useState<string>("baseline");
 
   // Lazily create the world (no state updates during render).
   if (!worldRef.current) {
@@ -44,6 +46,22 @@ export function Ecosystem() {
     worldRef.current = new World({ width: WORLD_W, height: WORLD_H, initialAgents, seed: (Math.random() * 1e9) | 0 });
     selectedRef.current = null;
     setSelectedId(null);
+  };
+
+  const applyScenario = (id: string) => {
+    const sc = SCENARIOS.find((s) => s.id === id);
+    worldRef.current = new World({ width: WORLD_W, height: WORLD_H, initialAgents: pop, seed: (Math.random() * 1e9) | 0 });
+    if (sc) worldRef.current.configure(sc.drivers, sc.interventions);
+    selectedRef.current = null;
+    setSelectedId(null);
+    setScenario(id);
+    setRunning(true);
+  };
+
+  // Any manual knob change means we're no longer on a named scenario.
+  const onKnob = () => {
+    setScenario("custom");
+    setRev((r) => (r + 1) & 0xffff);
   };
 
   // Keep refs in sync with state.
@@ -90,12 +108,11 @@ export function Ecosystem() {
   };
 
   const world = worldRef.current!;
-  const refresh = () => setRev((r) => (r + 1) & 0xffff);
 
   return (
     <div className="eco">
       <aside className="eco-left">
-        <WorldControls world={world} onChange={refresh} />
+        <WorldControls world={world} onChange={onKnob} />
       </aside>
 
       <div className="eco-center">
@@ -114,6 +131,20 @@ export function Ecosystem() {
             ↻ Reset
           </button>
           <span className="badge mono" title="1 tick = 6 hours">Day {world.metrics().day}</span>
+          <select
+            className="scenario-select"
+            value={scenario}
+            onChange={(e) => applyScenario(e.target.value)}
+            title={SCENARIOS.find((s) => s.id === scenario)?.note || "Custom posture"}
+            aria-label="Scenario"
+          >
+            {scenario === "custom" && <option value="custom">Custom</option>}
+            {SCENARIOS.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
           <span className="eyebrow" style={{ marginLeft: 4 }}>colour by</span>
           <ToggleGroup aria-label="Colour offenders by" value={colorBy} onValueChange={(v) => setColorBy(v as ColorBy)}>
             {COLOR_MODES.map(([k, label]) => (

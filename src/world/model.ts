@@ -3,6 +3,7 @@ import {
   MOTIVATIONS,
   MOTIVATION_IDS,
   clamp01,
+  effectiveSkill,
   expectedUtility,
   perceivedCatch,
   reachFactor,
@@ -32,6 +33,7 @@ const SECTOR_DEFS: Omit<Sector, "economy" | "nodes" | "loss" | "breaches">[] = [
     gdpWeight: 0.22,
     baseDefense: 0.35,
     harm: 0.7,
+    payPropensity: 1.2,
     coupling: { retail: 0.3, crypto: 0.4, healthcare: 0.2, government: 0.2, critical: 0.2 },
   },
   {
@@ -42,6 +44,7 @@ const SECTOR_DEFS: Omit<Sector, "economy" | "nodes" | "loss" | "breaches">[] = [
     gdpWeight: 0.08,
     baseDefense: 0.25,
     harm: 0.5,
+    payPropensity: 0.9,
     coupling: { finance: 0.3 },
   },
   {
@@ -52,6 +55,7 @@ const SECTOR_DEFS: Omit<Sector, "economy" | "nodes" | "loss" | "breaches">[] = [
     gdpWeight: 0.15,
     baseDefense: 0.3,
     harm: 0.8,
+    payPropensity: 1.1,
     coupling: { critical: 0.25, healthcare: 0.2 },
   },
   {
@@ -62,6 +66,7 @@ const SECTOR_DEFS: Omit<Sector, "economy" | "nodes" | "loss" | "breaches">[] = [
     gdpWeight: 0.2,
     baseDefense: 0.3,
     harm: 1.0,
+    payPropensity: 1.5,
     coupling: { finance: 0.3, healthcare: 0.3, government: 0.2, retail: 0.3 },
   },
   {
@@ -72,6 +77,7 @@ const SECTOR_DEFS: Omit<Sector, "economy" | "nodes" | "loss" | "breaches">[] = [
     gdpWeight: 0.15,
     baseDefense: 0.2,
     harm: 1.0,
+    payPropensity: 1.6,
     coupling: { government: 0.15 },
   },
   {
@@ -82,6 +88,7 @@ const SECTOR_DEFS: Omit<Sector, "economy" | "nodes" | "loss" | "breaches">[] = [
     gdpWeight: 0.2,
     baseDefense: 0.15,
     harm: 0.4,
+    payPropensity: 0.85,
     coupling: { finance: 0.2 },
   },
 ];
@@ -129,6 +136,7 @@ export class World {
     perceivedImpunity: 0.6,
     cryptoLiquidity: 0.6,
     contagion: 0.4,
+    aiEnabled: 0.4,
   };
   interventions: Interventions = {
     takedown: 0,
@@ -251,6 +259,7 @@ export class World {
       ),
       cryptoLiquidity: clamp01(d.cryptoLiquidity - iv.cashoutDisruption * 0.6),
       contagion: d.contagion,
+      aiEnabled: d.aiEnabled,
     };
   }
 
@@ -453,6 +462,7 @@ export class World {
       d.economicStrain * 1.6 +
       d.toolingAvailability * 1.2 +
       d.perceivedImpunity * 1.1 +
+      d.aiEnabled * 0.9 + // AI lowers the barrier to entry, swelling the inflow
       d.contagion * this.recentSuccessRate() * 2;
     const rate = pressure * (1 - this.interventions.diversion * 0.5) * 0.9;
     this.recruitAcc += rate;
@@ -577,7 +587,7 @@ export class World {
       return;
     }
     const prof = MOTIVATIONS[a.mot];
-    const skillEff = Math.min(1, a.skill + d.toolingAvailability * (1 - a.skill) * 0.5);
+    const skillEff = effectiveSkill(a.skill, d);
     const defense = Math.min(0.98, sec.baseDefense + node.defense + iv.hardening * 0.25);
     const pSuccess = clamp01(skillEff * 0.9 - defense + 0.1);
 
@@ -611,7 +621,8 @@ export class World {
       // HARM but only sometimes yields REVENUE — and only revenue grows the
       // offender economy. This is the prevention thesis in the model.
       const payProb = clamp01(
-        0.23 *
+        0.2 *
+          sec.payPropensity * // healthcare/critical pay more (Coveware/Statista 2025); weighted avg ≈ 23%
           (1 - iv.hardening * 0.45) *
           (1 - node.defense * 0.4) *
           (1 - iv.cashoutDisruption * 0.25) *
@@ -816,6 +827,14 @@ export class World {
   // ---- public accessors for the UI ----
   metrics(): Metrics {
     return this.m;
+  }
+
+  /** Apply a scenario: set drivers and levers as an established regime
+   *  (capability already fielded, so it's at steady state, not just funded). */
+  configure(drivers: Partial<Drivers>, interventions: Partial<Interventions>) {
+    this.drivers = { ...this.drivers, ...drivers };
+    this.interventions = { ...this.interventions, ...interventions };
+    this.effIv = { ...this.interventions };
   }
 
   pickAgent(x: number, y: number, radius = 10): Agent | null {

@@ -88,7 +88,7 @@ export function WorldDashboard({ world }: { world: World }) {
             />
             <Big
               label="Clearance rate"
-              value={m.breaches ? `${((m.arrestsMade / m.breaches) * 100).toFixed(1)}%` : "—"}
+              value={m.breaches ? `${Math.min(100, (m.arrestsMade / m.breaches) * 100).toFixed(1)}%` : "—"}
               tone="gov"
             />
             <Big label="Total arrests" value={compact(m.arrestsMade)} tone="gov" />

@@ -96,9 +96,10 @@ export const MOTIVATIONS: Record<MotivationId, Motivation> = {
 
 export const MOTIVATION_IDS = Object.keys(MOTIVATIONS) as MotivationId[];
 
-/** Effective capability, lifted by how much ready-made tooling is around. */
+/** Effective capability, lifted by ready-made tooling and AI assistance. */
 export function effectiveSkill(skill: number, d: Drivers): number {
-  return Math.min(1, skill + d.toolingAvailability * (1 - skill) * 0.5);
+  const lift = (d.toolingAvailability + d.aiEnabled * 0.6) * (1 - skill) * 0.5;
+  return Math.min(1, skill + lift);
 }
 
 /**
@@ -186,10 +187,10 @@ export function recruitMotivation(
 ): MotivationId {
   const w: Record<MotivationId, number> = {
     economic: 1 + d.economicStrain * 2.2,
-    professional: 0.6 + d.cryptoLiquidity * 0.8,
+    professional: 0.6 + d.cryptoLiquidity * 0.8 + d.aiEnabled * 0.5, // AI scales organised ops
     ideological: 0.5 + d.perceivedImpunity * 0.4,
     thrill: 0.7,
-    opportunistic: 0.5 + d.toolingAvailability * 2.5,
+    opportunistic: 0.5 + d.toolingAvailability * 2.5 + d.aiEnabled * 1.5, // AI lowers the barrier
   };
   // Social contagion: bias toward motivations that have been succeeding.
   for (const id of MOTIVATION_IDS) w[id] += d.contagion * (successMix[id] ?? 0) * 2;

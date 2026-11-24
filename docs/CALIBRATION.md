@@ -33,8 +33,24 @@ was validated. Figures are 2025–2026 unless noted.
 | **Offenders sit in tiered jurisdictions; some shielded** | Non-cooperating safe havens; Russia's ecosystem is a state-controlled market with "controlled impunity" shielding state-useful actors | Recorded Future *Dark Covenant 3.0*; CyberPeace Institute |
 | **Enforcement reach is cooperation-gated** | International cooperation hinges on harmonised law and MLATs; attribution is hard and slow | UNODC Cybercrime Module 7; attribution literature |
 | **Harm is disclosed late** | Breach notification/disclosure trails discovery (regulatory lag), which itself trails the breach | Breach-notification analyses; IBM lifecycle |
+| **Sectors pay at different rates** | Healthcare pays well above average (~36% in 2025, down from 61% in 2022); energy/tech highest average ransom (~$1.67M), healthcare second | Fierce Healthcare; Statista; TechTarget |
+| **AI is scaling attacks** | 2025 "AI Oversight Gap": AI used across phishing and recon; shadow AI adds ~$670k to breach cost | IBM 2025 |
 
 Full citations in [SOURCES.md](SOURCES.md).
+
+### Sectors, AI, and scenarios
+
+- **Sector payment propensity.** The ~23% baseline is a weighted average; each sector
+  carries a multiplier so healthcare and critical infrastructure pay more (≈35%) and retail
+  less, matching the sector breakdowns.
+- **AI-enabled attacks.** A driver that lowers the effective skill barrier and swells the
+  low-skill inflow (more opportunists), reflecting generative AI in phishing/recon.
+- **Scenario presets.** Seven named worlds (`src/world/scenarios.ts`) set the drivers and
+  levers together as an established regime, for side-by-side comparison. Validation of their
+  steady states: Resilient Nation collapses the ecosystem (pay 2%, revenue ≈ $0, GDP 100);
+  Safe-Haven Impunity lets it thrive (clearance ~5%, highest revenue); Payment Ban cuts the
+  pay rate to ~11% without stopping attacks; Coordinated Crackdown halves the population but
+  runs far over budget.
 
 ### Jurisdiction & disclosure (two more realism layers)
 
