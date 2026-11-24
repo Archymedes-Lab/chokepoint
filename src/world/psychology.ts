@@ -20,7 +20,7 @@ export const MOTIVATIONS: Record<MotivationId, Motivation> = {
   economic: {
     id: "economic",
     name: "Economic / strain",
-    color: "#f0a33c",
+    color: "#e8b24c",
     blurb:
       "Driven by money and hardship. Pragmatic, moderate risk, chases the highest payout. Grows when the legitimate economy fails people.",
     greed: 1.3,
@@ -35,7 +35,7 @@ export const MOTIVATIONS: Record<MotivationId, Motivation> = {
   professional: {
     id: "professional",
     name: "Professional / organised",
-    color: "#f2695e",
+    color: "#ff6b9d",
     blurb:
       "Calculating, well-resourced, ROI-driven. Low risk appetite, high skill. The RaaS operators and brokers — hit by takedowns and cash-out disruption.",
     greed: 1.5,
@@ -50,7 +50,7 @@ export const MOTIVATIONS: Record<MotivationId, Motivation> = {
   ideological: {
     id: "ideological",
     name: "Ideological / grievance",
-    color: "#7aa0ff",
+    color: "#a78bfa",
     blurb:
       "Motivated by a cause or grievance, not money. Targets 'the system' — government and critical infrastructure. Hard to deter with punishment.",
     greed: 0.3,
@@ -65,7 +65,7 @@ export const MOTIVATIONS: Record<MotivationId, Motivation> = {
   thrill: {
     id: "thrill",
     name: "Thrill / status",
-    color: "#35c48b",
+    color: "#34d399",
     blurb:
       "In it for the challenge and the notoriety. Notoriety is a reward in itself; deterred more by peers than by prison. Often young.",
     greed: 0.5,
@@ -80,7 +80,7 @@ export const MOTIVATIONS: Record<MotivationId, Motivation> = {
   opportunistic: {
     id: "opportunistic",
     name: "Opportunistic / low-skill",
-    color: "#9aa7b8",
+    color: "#94a3b8",
     blurb:
       "Low skill, enabled entirely by cheap tooling. Hits the weakest targets, easily deterred, high churn. Surges when kits are cheap and plentiful.",
     greed: 1.0,

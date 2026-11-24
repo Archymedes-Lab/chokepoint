@@ -4,17 +4,17 @@ import { drawWorld } from "../world/render";
 import { WorldControls } from "./WorldControls";
 import { WorldDashboard } from "./WorldDashboard";
 import { Inspector } from "./Inspector";
-import { ToggleGroup, ToggleItem, Switch, Slider } from "./radix";
+import { MapKey, worldRead } from "./MapKey";
+import { ToggleGroup, ToggleItem, Slider } from "./radix";
+import type { ColorBy } from "../world/render";
 
 const WORLD_W = 1000;
 const WORLD_H = 620;
 const SPEEDS = [1, 2, 4, 8];
-const OFFENDER_LEGEND: [string, string][] = [
-  ["economic", "#f0a33c"],
-  ["professional", "#f2695e"],
-  ["ideological", "#7aa0ff"],
-  ["thrill", "#35c48b"],
-  ["opportunistic", "#9aa7b8"],
+const COLOR_MODES: [ColorBy, string][] = [
+  ["motivation", "Motivation"],
+  ["activity", "Activity"],
+  ["heat", "Heat"],
 ];
 
 export function Ecosystem() {
@@ -23,14 +23,14 @@ export function Ecosystem() {
   const runningRef = useRef(true);
   const speedRef = useRef(2);
   const selectedRef = useRef<number | null>(null);
-  const showHeatRef = useRef(false);
+  const colorByRef = useRef<ColorBy>("motivation");
 
   const [, setRev] = useState(0);
   const [running, setRunning] = useState(true);
   const [speed, setSpeed] = useState(2);
   const [pop, setPop] = useState(600);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [showHeat, setShowHeat] = useState(false);
+  const [colorBy, setColorBy] = useState<ColorBy>("motivation");
 
   // Lazily create the world (no state updates during render).
   if (!worldRef.current) {
@@ -48,7 +48,7 @@ export function Ecosystem() {
   useEffect(() => void (runningRef.current = running), [running]);
   useEffect(() => void (speedRef.current = speed), [speed]);
   useEffect(() => void (selectedRef.current = selectedId), [selectedId]);
-  useEffect(() => void (showHeatRef.current = showHeat), [showHeat]);
+  useEffect(() => void (colorByRef.current = colorBy), [colorBy]);
 
   // Main loop: step the sim and render every animation frame.
   useEffect(() => {
@@ -63,7 +63,7 @@ export function Ecosystem() {
         if (runningRef.current) {
           for (let i = 0; i < speedRef.current; i++) w.step();
         }
-        drawWorld(ctx, w, { selectedId: selectedRef.current, showHeat: showHeatRef.current });
+        drawWorld(ctx, w, { selectedId: selectedRef.current, colorBy: colorByRef.current });
         // Refresh the React panels a few times a second, not every frame.
         if (t - lastRefresh > 120) {
           lastRefresh = t;
@@ -111,10 +111,14 @@ export function Ecosystem() {
           <button className="btn" onClick={() => reset(pop)}>
             ↻ Reset
           </button>
-          <label className="toggle">
-            <Switch checked={showHeat} onCheckedChange={setShowHeat} aria-label="Heat view" />
-            Heat view
-          </label>
+          <span className="eyebrow" style={{ marginLeft: 4 }}>colour by</span>
+          <ToggleGroup aria-label="Colour offenders by" value={colorBy} onValueChange={(v) => setColorBy(v as ColorBy)}>
+            {COLOR_MODES.map(([k, label]) => (
+              <ToggleItem key={k} value={k}>
+                {label}
+              </ToggleItem>
+            ))}
+          </ToggleGroup>
           <div className="pop-field">
             <span className="eyebrow">seed pop</span>
             <Slider
@@ -140,17 +144,12 @@ export function Ecosystem() {
           />
         </div>
 
-        <div className="legend-bar">
-          <span className="eyebrow">offenders</span>
-          {OFFENDER_LEGEND.map(([name, col]) => (
-            <span key={name} className="legend-item">
-              <i style={{ background: col }} /> {name}
-            </span>
-          ))}
-          <span className="eyebrow" style={{ marginLeft: 8 }}>response</span>
-          <span className="legend-item"><i style={{ background: "#4b8dff" }} /> defenders (SOC)</span>
-          <span className="legend-item"><i style={{ background: "#e3a53a" }} /> gov. takedown</span>
+        <div className="mapread">
+          <span className="mapread-tag">MAP READ</span>
+          <span className="mapread-text">{worldRead(world)}</span>
         </div>
+
+        <MapKey colorBy={colorBy} />
 
         <Inspector world={world} selectedId={selectedId} />
       </div>
