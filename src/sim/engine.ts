@@ -409,8 +409,10 @@ function computeEconomics(st: RunState): { net: number; loss: number } {
     switch (st.agent.goal) {
       case "ransomware": {
         payout = v * 0.06;
-        paymentProb = 0.5 * (1 - 0.55 * backupCov) + (st.doubleExtortion ? 0.2 : 0);
-        if (st.detectedLate) paymentProb -= 0.1;
+        // Calibrated to Coveware Q3 2025: ~23% of ransomware victims pay, and
+        // falling. Backups and double-extortion move it; see docs/CALIBRATION.md.
+        paymentProb = 0.26 * (1 - 0.55 * backupCov) + (st.doubleExtortion ? 0.08 : 0);
+        if (st.detectedLate) paymentProb -= 0.05;
         paymentProb = clamp01(Math.max(0.03, paymentProb));
         const downtime = v * (backupCov > 0.4 ? 0.08 : 0.22) * (st.detectedLate ? 0.8 : 1);
         const paid = st.rng.chance(paymentProb);
@@ -420,7 +422,8 @@ function computeEconomics(st: RunState): { net: number; loss: number } {
       }
       case "data-theft": {
         payout = v * 0.03;
-        paymentProb = clamp01(0.35 - (st.detectedLate ? 0.1 : 0));
+        // Coveware Q3 2025: data-theft-only extortion payment rate ~19%.
+        paymentProb = clamp01(0.19 - (st.detectedLate ? 0.05 : 0));
         const paid = st.rng.chance(paymentProb);
         loss = v * 0.08 + (paid ? payout : 0);
         payout = paid ? payout : 0;
@@ -428,7 +431,9 @@ function computeEconomics(st: RunState): { net: number; loss: number } {
       }
       case "bec": {
         payout = v * 0.04;
-        paymentProb = clamp01(st.detectedLate ? 0.3 : 0.7);
+        // BEC is fraud, not extortion: an undetected diverted wire usually
+        // clears, but out-of-band callback blocks most of it upstream.
+        paymentProb = clamp01(st.detectedLate ? 0.25 : 0.5);
         const paid = st.rng.chance(paymentProb);
         loss = paid ? payout : v * 0.005;
         payout = paid ? payout : 0;

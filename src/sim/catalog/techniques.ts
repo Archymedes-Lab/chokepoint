@@ -35,7 +35,7 @@ export const TECHNIQUES: Technique[] = [
     tactic: "TA0001 · T1555",
     blurb:
       "Log in with credentials and session cookies harvested from a stealer log.",
-    baseSuccess: 0.75,
+    baseSuccess: 0.8,
     noise: 0.2,
     cost: 5,
     time: 4,
@@ -54,7 +54,7 @@ export const TECHNIQUES: Technique[] = [
     tactic: "TA0001 · T1557",
     blurb:
       "Reverse-proxy phishing kit relays the victim through the real login and captures the live session.",
-    baseSuccess: 0.6,
+    baseSuccess: 0.52,
     noise: 0.3,
     cost: 10,
     time: 6,
@@ -91,7 +91,7 @@ export const TECHNIQUES: Technique[] = [
     tactic: "TA0001 · T1190",
     blurb:
       "Leverage a known vulnerability in an internet-facing appliance.",
-    baseSuccess: 0.5,
+    baseSuccess: 0.58,
     noise: 0.4,
     cost: 12,
     time: 8,

@@ -25,8 +25,20 @@ export function WorldDashboard({ world }: { world: World }) {
             <Big label="Records stolen" value={compact(m.recordsStolen)} />
             <Big label="Victim orgs" value={compact(m.victims)} />
             <Big label="Breaches" value={compact(m.breaches)} />
+            <Big label="Attacker revenue" value={money(m.attackerRevenue)} tone="attacker" />
+            <Big
+              label="Payment rate"
+              value={m.extortionAttempts ? `${Math.round((m.paidCount / m.extortionAttempts) * 100)}%` : "—"}
+              tone="attacker"
+            />
           </div>
           <Spark history={world.history} />
+          <div className="note">
+            Every breach does <b>harm</b>, but only a paying victim gives the attacker <b>revenue</b>
+            — and revenue is what recruits the next offender. The real-world payment rate is ~23%
+            (ransomware) / 19% (data-theft) and falling (Coveware, Q3 2025). Driving it lower with
+            backups and a no-pay posture starves the ecosystem at its source.
+          </div>
         </div>
       </section>
 

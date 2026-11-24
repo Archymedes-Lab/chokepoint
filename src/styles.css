@@ -612,3 +612,7 @@ select {
 .field:hover .rx-slider-track { background: color-mix(in srgb, var(--line-2) 65%, var(--ink)); }
 /* tighten focus rings to the brand */
 .btn:focus-visible, .icon-btn:focus-visible, .rx-tab:focus-visible, .rx-toggle-item:focus-visible { outline: 2px solid var(--def); outline-offset: 1px; }
+
+/* badge with inline info affordance */
+.badge { display: inline-flex; align-items: center; gap: 6px; }
+.badge .rx-info { width: 13px; height: 13px; font-size: 9px; }

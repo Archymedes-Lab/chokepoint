@@ -5,7 +5,7 @@ import { PosturePanel } from "./ui/PosturePanel";
 import { SingleRun } from "./ui/SingleRun";
 import { MonteCarlo } from "./ui/MonteCarlo";
 import { Ecosystem } from "./ui/Ecosystem";
-import { Tabs, TabsList, Tab, TabPanel, TooltipProvider } from "./ui/radix";
+import { Tabs, TabsList, Tab, TabPanel, TooltipProvider, Info } from "./ui/radix";
 
 type Mode = "eco" | "micro";
 const THEME_KEY = "chokepoint-theme";
@@ -58,6 +58,14 @@ export default function App() {
               </TabsList>
             </div>
             <span className="badge">Defensive · Simulation</span>
+            <span className="badge">
+              Calibrated 2025–26
+              <Info>
+                Payment rates (~23% ransomware / 19% data-theft), access vectors, dwell time and
+                harm scale are anchored to 2025–26 data — Coveware, Verizon DBIR, Mandiant M-Trends,
+                IBM, FIDO Alliance. See docs/CALIBRATION.md.
+              </Info>
+            </span>
             <div className="spacer" />
             <button
               className="icon-btn"

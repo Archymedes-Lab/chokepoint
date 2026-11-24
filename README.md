@@ -27,6 +27,13 @@ kind of offender.
 That's the thesis of this project, and the reason it's open: **understanding how and why
 they operate — out in the open — is how defenders and authorities get ahead of them.**
 
+It is built as **a study of how to actually prevent cybercrime**, so its dynamics are
+anchored to the latest public data (Coveware, Verizon DBIR, Mandiant M-Trends, IBM, FIDO
+Alliance). The central, evidence-based mechanism: **a breach almost always does harm, but
+only ~23% of victims pay** — and only payment funds the attacker and recruits the next one.
+So defence and a no-pay posture don't just block attacks, they *starve the ecosystem*. See
+[docs/CALIBRATION.md](docs/CALIBRATION.md).
+
 Chokepoint has two linked models:
 
 ### 1. Ecosystem (the main view) — a 2D agent-based world
@@ -120,6 +127,7 @@ bun run preview
 
 | Doc | What's in it |
 |-----|--------------|
+| [CALIBRATION.md](docs/CALIBRATION.md) | What the model is anchored to in 2025–26 data, the harm-vs-revenue correction, and validation runs. |
 | [WORLD.md](docs/WORLD.md) | The ecosystem model: agents, psychology, drivers, levers, metrics, the advisor, displacement. |
 | [MODEL.md](docs/MODEL.md) | The Encounter model: stages, decision function, resolution, economics. |
 | [CATALOG.md](docs/CATALOG.md) | Stages, techniques, controls, and archetypes for the Encounter model. |

@@ -144,6 +144,10 @@ export interface Metrics {
   defenderEvictions: number; // cumulative captures made by guardians
   patches: number; // cumulative node hardenings by defenders
   takedownOps: number; // cumulative government infrastructure strikes
+  // attacker economy (calibrated to real payment rates — see docs/CALIBRATION.md)
+  attackerRevenue: number; // cumulative $ actually paid to offenders
+  extortionAttempts: number; // breaches that issued a demand
+  paidCount: number; // breaches where the victim paid
 }
 
 export interface WorldConfig {

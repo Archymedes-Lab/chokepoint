@@ -528,12 +528,8 @@ export class World {
     const pSuccess = clamp01(skillEff * 0.9 - defense + 0.1);
 
     if (this.rng.chance(pSuccess)) {
-      // Harm done. Damage scales with node value and the attacker's reach.
-      const cashout = 0.25 + 0.75 * d.cryptoLiquidity * (1 - iv.cashoutDisruption);
       const sev = this.rng.range(0.15, 0.4);
       const loss = node.value * sev;
-      const payoff = loss * cashout * 0.6;
-      a.wealth += payoff;
       a.ops++;
       a.heat = Math.min(1, a.heat + 0.12);
       node.health = Math.max(0, node.health - sev);
@@ -545,15 +541,33 @@ export class World {
       sec.economy = Math.max(0, sec.economy - sev * (0.8 + sec.harm) * 3.2);
       sec.loss += loss;
       sec.breaches++;
-      // Global harm metrics (multiple dimensions of damage).
+      // Victim harm is booked on EVERY breach, regardless of payment.
       this.m.financialLoss += loss;
       this.m.recoveryCost += loss * 0.45;
       this.m.downtimeHours += sev * 120 * (1 + sec.harm);
       this.m.recordsStolen += Math.round((node.value / 12) * sev);
       this.m.victims += 1;
       this.m.breaches++;
+      this.m.extortionAttempts++;
       this.m.publicTrust = Math.max(0, this.m.publicTrust - sev * sec.harm * 0.6);
-      this.successMix[a.mot] = Math.min(1, this.successMix[a.mot] + 0.05);
+
+      // --- Payment is the real divergence from reality. Only ~1 in 4 victims
+      // pay (Coveware Q3 2025: 23% ransomware / 19% data-theft). Defence and
+      // a no-pay posture suppress it further. So a breach almost always does
+      // HARM but only sometimes yields REVENUE — and only revenue grows the
+      // offender economy. This is the prevention thesis in the model.
+      const payProb = clamp01(
+        0.23 * (1 - iv.hardening * 0.45) * (1 - node.defense * 0.4) * (1 - iv.cashoutDisruption * 0.25),
+      );
+      const paid = this.rng.chance(payProb);
+      const cashout = 0.25 + 0.75 * d.cryptoLiquidity * (1 - iv.cashoutDisruption);
+      const payoff = paid ? loss * cashout * 0.6 : loss * 0.015; // unpaid = scraps (resale)
+      a.wealth += payoff;
+      this.m.attackerRevenue += payoff;
+      if (paid) this.m.paidCount++;
+      // Contagion is drawn by PROFIT, not mere intrusion: a paid hit recruits
+      // imitators far more than an unpaid one.
+      this.successMix[a.mot] = Math.min(1, this.successMix[a.mot] + (paid ? 0.07 : 0.015));
       this.pulses.push({ x: node.x, y: node.y, r: 0, life: 1, kind: "breach" });
       if (loss > 400_000)
         this.pushEvent(
@@ -707,6 +721,9 @@ export class World {
       defenderEvictions: 0,
       patches: 0,
       takedownOps: 0,
+      attackerRevenue: 0,
+      extortionAttempts: 0,
+      paidCount: 0,
     };
   }
 

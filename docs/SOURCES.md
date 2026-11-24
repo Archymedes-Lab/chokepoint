@@ -51,6 +51,20 @@ Retrieved 2026-11.
 - *International legal responses to ransomware: toward a ban on payments?* — 2025.
 - RUSI, *Ransomware: A Perfect Storm*.
 
+## Latest quantitative anchors (2025–2026)
+
+Used to calibrate payment rates, access vectors, dwell time, intervention effects and harm
+scale — see [CALIBRATION.md](CALIBRATION.md).
+
+- **Payment rates & ransom economics** — Coveware, *Q3 2025 Ransomware Report* (23% ransomware / 19% data-theft payment rate; avg payment ~$140k); BleepingComputer & Help Net Security coverage; CSO Online.
+- **Breach cost** — IBM, *Cost of a Data Breach Report 2025* (first decline in five years; lifecycle and initial-vector breakdowns).
+- **Initial access vectors** — Verizon, *2025 DBIR* (exploitation +34%; credential abuse; third-party involvement ~30%; ransomware in ~44% of breaches); Mandiant/Google Cloud, *M-Trends 2025* (stolen credentials & exploits rising, phishing waning; dwell times).
+- **Phishing-resistant MFA** — FIDO Alliance, *Passkey Index 2026* (36% of sign-ins; 93% vs 78% success); Okta, *Phishing is a trap. Passkeys aren't.*
+- **Infostealer scale** — Recorded Future, *2025 Identity Threat Landscape* (credential theft the dominant access vector); Flashpoint, *Stealer Log Statistics 2025/26* (11.1M infected hosts; 3.3B credentials).
+- **Takedown effects / displacement** — Cybersecurity Dive, *Ransomware gangs capitalize on takedowns of competitors*; Operation Cronos / LockBit analyses.
+- **Deterrence** — Maimon, Howell & Burruss, *Restrictive deterrence and the scope of hackers' reoffending* (randomised field trials, Computers in Human Behavior, 2021).
+- **Harm scale** — Cybersecurity Ventures, *2025 Cybersecurity Almanac* ($10.5T in 2025; $12.2T by 2031).
+
 ## Agent-based modelling for cybercrime policy
 
 - *Modelling and simulation for cybercrime policy analysis* (thesis).
