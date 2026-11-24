@@ -2,6 +2,7 @@ import type { World } from "../world/model";
 import { money } from "../world/model";
 import { MOTIVATIONS } from "../world/psychology";
 import type { AgentState } from "../world/types";
+import { CollapsiblePanel } from "./radix";
 
 const STATE_LABEL: Record<AgentState, string> = {
   seek: "choosing a target",
@@ -17,12 +18,7 @@ export function Inspector({ world, selectedId }: { world: World; selectedId: num
   const a = selectedId != null ? world.agents.find((x) => x.id === selectedId) : null;
 
   return (
-    <section className="panel">
-      <div className="hd">
-        <h2>Forensic Profile</h2>
-        <span className="sub">{a ? `offender #${a.id}` : "click an offender"}</span>
-      </div>
-      <div className="bd">
+    <CollapsiblePanel title="Forensic Profile" sub={a ? `offender #${a.id}` : "click an offender"}>
         {!a && (
           <div className="muted" style={{ fontSize: "0.82rem" }}>
             Click any moving pixel in the world to inspect that offender — their motivation,
@@ -69,8 +65,7 @@ export function Inspector({ world, selectedId }: { world: World; selectedId: num
             </div>
           </>
         )}
-      </div>
-    </section>
+    </CollapsiblePanel>
   );
 }
 

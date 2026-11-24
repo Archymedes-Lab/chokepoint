@@ -637,3 +637,22 @@ a.wire-title:hover { text-decoration: underline; }
 /* scenario selector (inline, auto width) */
 .scenario-select { width: auto; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line-2); font-family: var(--font); font-size: 12px; padding: 4px 8px; cursor: pointer; }
 .scenario-select:hover { border-color: var(--ink); }
+
+/* ---- collapsible panels + section labels ---- */
+.section-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--faint); padding: 2px 2px; display: flex; align-items: center; gap: 10px; }
+.section-label::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.cpanel-hd { display: flex; align-items: baseline; gap: 8px; padding: 10px 12px 10px 10px; border-bottom: 1px solid var(--line); }
+.cpanel-toggle { background: none; border: none; color: var(--muted); cursor: pointer; padding: 0 2px; align-self: center; line-height: 1; }
+.cpanel-toggle:hover { color: var(--ink); }
+.cpanel-chevron { display: inline-block; transition: transform 0.15s ease; font-size: 15px; line-height: 1; }
+.cpanel-toggle.open .cpanel-chevron { transform: rotate(90deg); }
+.cpanel-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; cursor: pointer; }
+.cpanel-hd .sub { font-size: 11px; color: var(--faint); }
+.cpanel-spacer { flex: 1; }
+.cpanel-body { overflow: hidden; }
+.cpanel-body[data-state="open"] { animation: cpanel-down 0.18s ease; }
+.cpanel-body[data-state="closed"] { animation: cpanel-up 0.18s ease; }
+.cpanel-body-inner { padding: 12px; }
+@keyframes cpanel-down { from { height: 0 } to { height: var(--radix-collapsible-content-height) } }
+@keyframes cpanel-up { from { height: var(--radix-collapsible-content-height) } to { height: 0 } }
+@media (prefers-reduced-motion: reduce) { .cpanel-body { animation: none !important; } }

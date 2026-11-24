@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchNews, getEndpoint, setEndpoint } from "../news/providers";
 import type { NewsResult } from "../news/types";
-import { ScrollArea } from "./radix";
+import { ScrollArea, CollapsiblePanel } from "./radix";
 
 const REFRESH_MS = 5 * 60 * 1000;
 
@@ -33,20 +33,22 @@ export function ThreatWire() {
   const statusTone = res?.status === "live" ? "live" : "off";
 
   return (
-    <section className="panel wire">
-      <div className="hd">
-        <h2>Live Threat Wire</h2>
-        <span className="sub">real cyber-attack news worldwide</span>
-        <div className="spacer" style={{ flex: 1 }} />
-        <span className={`wire-status ${statusTone}`}>{statusLabel}</span>
-        <button className="icon-btn wire-btn" onClick={load} aria-label="Refresh feed" disabled={loading}>
-          ↻
-        </button>
-        <button className="icon-btn wire-btn" onClick={() => setSettings((s) => !s)} aria-label="Feed settings">
-          ⚙
-        </button>
-      </div>
-      <div className="bd">
+    <CollapsiblePanel
+      className="wire"
+      title="Live Threat Wire"
+      sub="real cyber-attack news worldwide"
+      right={
+        <>
+          <span className={`wire-status ${statusTone}`}>{statusLabel}</span>
+          <button className="icon-btn wire-btn" onClick={load} aria-label="Refresh feed" disabled={loading}>
+            ↻
+          </button>
+          <button className="icon-btn wire-btn" onClick={() => setSettings((s) => !s)} aria-label="Feed settings">
+            ⚙
+          </button>
+        </>
+      }
+    >
         {settings && (
           <div className="wire-settings">
             <label className="hint" htmlFor="wire-ep">
@@ -116,8 +118,7 @@ export function ThreatWire() {
             ))}
           </div>
         </ScrollArea>
-      </div>
-    </section>
+    </CollapsiblePanel>
   );
 }
 

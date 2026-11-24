@@ -6,7 +6,7 @@ import { WorldDashboard } from "./WorldDashboard";
 import { Inspector } from "./Inspector";
 import { MapKey, worldRead } from "./MapKey";
 import { ThreatWire } from "./ThreatWire";
-import { ToggleGroup, ToggleItem, Slider } from "./radix";
+import { ToggleGroup, ToggleItem, Slider, SectionLabel } from "./radix";
 import type { ColorBy } from "../world/render";
 import { SCENARIOS } from "../world/scenarios";
 
@@ -112,6 +112,7 @@ export function Ecosystem() {
   return (
     <div className="eco">
       <aside className="eco-left">
+        <SectionLabel>Configuration</SectionLabel>
         <WorldControls world={world} onChange={onKnob} />
       </aside>
 
@@ -183,6 +184,7 @@ export function Ecosystem() {
           <span className="mapread-text">{worldRead(world)}</span>
         </div>
 
+        <SectionLabel>Detail &amp; Intelligence</SectionLabel>
         <MapKey colorBy={colorBy} />
 
         <ThreatWire />

@@ -1,6 +1,6 @@
 import type { World } from "../world/model";
 import type { Drivers, Interventions } from "../world/types";
-import { Slider, Info } from "./radix";
+import { Slider, Info, CollapsiblePanel } from "./radix";
 
 const DRIVER_META: { key: keyof Drivers; label: string; hint: string }[] = [
   { key: "economicStrain", label: "Economic strain", hint: "Hardship and unemployment — feeds recruitment and risk-taking." },
@@ -27,12 +27,8 @@ export function WorldControls({ world, onChange }: { world: World; onChange: () 
 
   return (
     <>
-      <section className="panel">
-        <div className="hd">
-          <h2>External Causes</h2>
-          <span className="sub">why offending rises &amp; falls</span>
-        </div>
-        <div className="bd">
+      <CollapsiblePanel title="External Causes" sub="why offending rises &amp; falls">
+        <>
           {DRIVER_META.map((d) => (
             <div className="field" key={d.key}>
               <label>
@@ -55,15 +51,11 @@ export function WorldControls({ world, onChange }: { world: World; onChange: () 
               />
             </div>
           ))}
-        </div>
-      </section>
+        </>
+      </CollapsiblePanel>
 
-      <section className="panel">
-        <div className="hd">
-          <h2>Authority Levers</h2>
-          <span className="sub">what the response invests in</span>
-        </div>
-        <div className="bd">
+      <CollapsiblePanel title="Authority Levers" sub="what the response invests in">
+        <>
           <div className={`budget ${over ? "over" : ""}`}>
             <div className="budget-row">
               <span className="eyebrow">Enforcement budget</span>
@@ -99,8 +91,8 @@ export function WorldControls({ world, onChange }: { world: World; onChange: () 
               />
             </div>
           ))}
-        </div>
-      </section>
+        </>
+      </CollapsiblePanel>
     </>
   );
 }

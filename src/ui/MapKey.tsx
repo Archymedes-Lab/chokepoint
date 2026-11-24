@@ -1,6 +1,7 @@
 import type { World } from "../world/model";
 import { MOTIVATIONS, MOTIVATION_IDS } from "../world/psychology";
 import type { ColorBy } from "../world/render";
+import { CollapsiblePanel } from "./radix";
 
 const DEF = "#38bdf8";
 
@@ -49,12 +50,7 @@ function Row({ glyph, label }: { glyph: React.ReactNode; label: string }) {
 
 export function MapKey({ colorBy }: { colorBy: ColorBy }) {
   return (
-    <section className="panel mapkey">
-      <div className="hd">
-        <h2>Map Key</h2>
-        <span className="sub">what every mark means</span>
-      </div>
-      <div className="bd">
+    <CollapsiblePanel className="mapkey" title="Map Key" sub="what every mark means" defaultOpen={false}>
         <div className="key-grid">
           <div className="key-cat">
             <div className="eyebrow">Infrastructure</div>
@@ -106,8 +102,7 @@ export function MapKey({ colorBy }: { colorBy: ColorBy }) {
             <Row glyph={<Glyph type="square" color="#ef4444" />} label="Breach" />
           </div>
         </div>
-      </div>
-    </section>
+    </CollapsiblePanel>
   );
 }
 
