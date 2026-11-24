@@ -134,6 +134,7 @@ export class World {
     hardening: 0,
     cooperation: 0.1,
     diversion: 0,
+    paymentBan: 0,
   };
   guardians: Guardian[] = [];
   pulses: { x: number; y: number; r: number; life: number; kind: PulseKind }[] = [];
@@ -148,6 +149,7 @@ export class World {
     hardening: 0,
     cooperation: 0.1,
     diversion: 0,
+    paymentBan: 0,
   };
 
   private nextId = 1;
@@ -253,7 +255,8 @@ export class World {
       iv.cashoutDisruption * 1.2 +
       iv.hardening * 1.0 +
       iv.cooperation * 0.7 +
-      iv.diversion * 0.8
+      iv.diversion * 0.8 +
+      iv.paymentBan * 0.3 // policy, not enforcement — cheap on budget, costly politically
     );
   }
 
@@ -598,7 +601,11 @@ export class World {
       // HARM but only sometimes yields REVENUE — and only revenue grows the
       // offender economy. This is the prevention thesis in the model.
       const payProb = clamp01(
-        0.23 * (1 - iv.hardening * 0.45) * (1 - node.defense * 0.4) * (1 - iv.cashoutDisruption * 0.25),
+        0.23 *
+          (1 - iv.hardening * 0.45) *
+          (1 - node.defense * 0.4) *
+          (1 - iv.cashoutDisruption * 0.25) *
+          (1 - iv.paymentBan * 0.65), // a ban / no-pay norm hits payment directly
       );
       const paid = this.rng.chance(payProb);
       const cashout = 0.25 + 0.75 * d.cryptoLiquidity * (1 - iv.cashoutDisruption);
@@ -852,6 +859,10 @@ export class World {
         "Fund a defensive uplift — but expect displacement.",
         "Harm is concentrating in under-defended sectors. Raising baseline defences helps, but on its own it pushes offenders toward softer targets rather than out of the game.",
       ],
+      paymentBan: [
+        "Weigh a ransom-payment ban / no-pay norm.",
+        "Payments are what fund the next offender. A ban or strong no-pay posture starves the economy at its source — politically fraught and hard on victims, but it hits the incentive, not just the attack.",
+      ],
     };
 
     const scores: Record<keyof typeof text, number> = {
@@ -861,6 +872,7 @@ export class World {
       cooperation: (ideological * 1.4 + havenPressure * 0.8) * (1 - iv.cooperation) - iv.cooperation * 0.5,
       arrests: d.perceivedImpunity * 1.2 - iv.arrests,
       hardening: defenseGap * 1.6 - iv.hardening,
+      paymentBan: (0.35 + economic) * d.cryptoLiquidity * 1.2 - iv.paymentBan,
     };
 
     let bestLever: keyof typeof text | null = null;

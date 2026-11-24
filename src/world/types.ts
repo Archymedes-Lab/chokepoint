@@ -110,6 +110,7 @@ export interface Interventions {
   hardening: number; // fund sector-wide defensive uplift
   cooperation: number; // international reach into safe havens
   diversion: number; // address root causes / recruitment (desistance programs)
+  paymentBan: number; // ban / no-pay norm that suppresses ransom payment
 }
 
 /** A defender (SOC / blue-team) unit operating in the landscape. */

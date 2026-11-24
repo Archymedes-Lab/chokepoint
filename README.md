@@ -53,8 +53,15 @@ motivation and a disposition, move through it and choose targets by **expected u
   offenders and patch weak targets; government takedowns (amber) strike infrastructure.
   Fund the levers and more of them appear on the board.
 - **Authority levers on a limited budget.** Arrests, infrastructure takedowns, cash-out
-  disruption, defensive uplift, international cooperation, and upstream diversion — you
-  can't fund them all, so you must prioritise.
+  disruption, defensive uplift, international cooperation, upstream diversion, and a
+  ransom-payment ban — you can't fund them all, so you must prioritise.
+- **A realistically slow response.** A sim clock (1 tick = 6h), policy that takes *months*
+  to field, investigations that build over time and mostly go cold — clearance rates in the
+  single digits, mean time to arrest in months. Enforcement mostly deters; it rarely catches
+  anyone in the act.
+- **A Live Threat Wire.** Real worldwide cyber-attack headlines alongside the model — the
+  simulation next to the reality it abstracts. Keyless by default, or point it at the
+  included Cloudflare Worker (`worker/`) for a reliable live feed (no API key ever in the repo).
 - **Damage in many dimensions.** Direct loss, recovery cost, GDP health, public trust,
   downtime, records stolen, victims, breaches — rippling across interdependent sectors.
 - **An advisor that decomplexifies.** It reads the live population and names the

@@ -17,6 +17,7 @@ const IV_META: { key: keyof Interventions; label: string; hint: string }[] = [
   { key: "hardening", label: "Defensive uplift", hint: "Fund sector-wide hardening — fewer suitable targets (watch displacement)." },
   { key: "cooperation", label: "International cooperation", hint: "Reach into non-cooperating jurisdictions / safe havens." },
   { key: "diversion", label: "Diversion programs", hint: "Address root causes — shrink the inflow of new offenders." },
+  { key: "paymentBan", label: "Ransom-payment ban / norm", hint: "Suppress ransom payments. Cheap on budget, politically fraught — but it starves the attacker economy at its source." },
 ];
 
 export function WorldControls({ world, onChange }: { world: World; onChange: () => void }) {

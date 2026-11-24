@@ -1,0 +1,6 @@
+name = "chokepoint-news-proxy"
+main = "news-proxy.js"
+compatibility_date = "2025-01-01"
+
+# Optional: pin a route/custom domain instead of the workers.dev subdomain.
+# routes = [{ pattern = "news.example.com", custom_domain = true }]

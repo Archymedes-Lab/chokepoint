@@ -5,6 +5,7 @@ import { WorldControls } from "./WorldControls";
 import { WorldDashboard } from "./WorldDashboard";
 import { Inspector } from "./Inspector";
 import { MapKey, worldRead } from "./MapKey";
+import { ThreatWire } from "./ThreatWire";
 import { ToggleGroup, ToggleItem, Slider } from "./radix";
 import type { ColorBy } from "../world/render";
 
@@ -151,6 +152,8 @@ export function Ecosystem() {
         </div>
 
         <MapKey colorBy={colorBy} />
+
+        <ThreatWire />
 
         <Inspector world={world} selectedId={selectedId} />
       </div>

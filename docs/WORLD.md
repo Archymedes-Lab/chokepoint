@@ -104,6 +104,7 @@ whole point.
 | **Defensive uplift (hardening)** | Raises sector baseDefense → fewer suitable targets (watch displacement). |
 | **International cooperation** | Extends reach into safe-haven jurisdictions; makes arrests stick. |
 | **Diversion programs** | Reduces strain-driven recruitment and raises desistance — the root-cause lever. |
+| **Ransom-payment ban / norm** | Suppresses ransom payment directly — cheap on budget, politically fraught, but it cuts the attacker's revenue (and thus recruitment) at the source. |
 
 Interventions feed back into the **effective drivers** (e.g. arrests lower perceived
 impunity; takedowns lower tooling availability; cash-out disruption lowers crypto

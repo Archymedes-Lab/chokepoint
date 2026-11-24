@@ -616,3 +616,20 @@ select {
 /* badge with inline info affordance */
 .badge { display: inline-flex; align-items: center; gap: 6px; }
 .badge .rx-info { width: 13px; height: 13px; font-size: 9px; }
+
+/* ---- live threat wire ---- */
+.wire-status { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+.wire-status.live { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, var(--line-2)); }
+.wire-btn { padding: 2px 8px; font-size: 13px; line-height: 1; }
+.wire-settings { border: 1px solid var(--line); padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+.wire-ep-row { display: flex; gap: 6px; }
+.wire-ep-row input { flex: 1; min-width: 0; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line-2); padding: 6px 8px; font-size: 12px; font-family: var(--mono); }
+.wire-note { border-left: 2px solid var(--gov); padding-left: 10px; margin-bottom: 10px; }
+.wire-list { display: flex; flex-direction: column; }
+.wire-item { display: grid; grid-template-columns: 8px 1fr; gap: 9px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.wire-item:last-child { border-bottom: none; }
+.wire-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--harm); margin-top: 5px; }
+.wire-title { font-size: 13px; color: var(--ink); line-height: 1.35; border-bottom: none; }
+a.wire-title { border-bottom: none; }
+a.wire-title:hover { text-decoration: underline; }
+.wire-meta { font-family: var(--mono); font-size: 10.5px; color: var(--faint); margin-top: 3px; }
