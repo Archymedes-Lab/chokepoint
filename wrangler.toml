@@ -1,0 +1,14 @@
+# state.archymedes.xyz: the Chokepoint web app as a static-assets Worker (client-only, no backend).
+#   bun run deploy
+# The optional news proxy is a separate Worker — see worker/.
+name = "chokepoint"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
+
+[[routes]]
+pattern = "state.archymedes.xyz"
+custom_domain = true
