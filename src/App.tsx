@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { ARCHETYPES, defaultPosture, type Archetype, type Posture } from "./sim";
 import { useSingleRun } from "./hooks/useSimulation";
 import { PosturePanel } from "./ui/PosturePanel";
@@ -7,7 +7,8 @@ import { MonteCarlo } from "./ui/MonteCarlo";
 import { Ecosystem } from "./ui/Ecosystem";
 import { Tabs, TabsList, Tab, TabPanel, TooltipProvider, Info } from "./ui/radix";
 
-type Mode = "eco" | "micro";
+type Mode = "eco" | "globe" | "micro";
+const ThreatGlobe = lazy(() => import("./ui/ThreatGlobe"));
 const THEME_KEY = "chokepoint-theme";
 
 export default function App() {
@@ -49,11 +50,12 @@ export default function App() {
                 <path d="M11 16h10M16 11l5 5-5 5" stroke="var(--harm)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <h1>Chokepoint</h1>
-              <span className="ver">v0.10</span>
+              <span className="ver">v0.11</span>
             </div>
             <div className="mode-tabs">
               <TabsList aria-label="Model">
                 <Tab value="eco">Ecosystem</Tab>
+                <Tab value="globe">Threat Globe</Tab>
                 <Tab value="micro">Encounter model</Tab>
               </TabsList>
             </div>
@@ -79,6 +81,11 @@ export default function App() {
 
         <TabPanel value="eco" className="view view-eco">
           <Ecosystem />
+        </TabPanel>
+        <TabPanel value="globe" className="view view-globe">
+          <Suspense fallback={<div className="globe-loading">Loading globe…</div>}>
+            <ThreatGlobe />
+          </Suspense>
         </TabPanel>
         <TabPanel value="micro" className="view view-micro">
           <MicroApp />

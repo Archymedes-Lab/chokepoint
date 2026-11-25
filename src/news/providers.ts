@@ -1,4 +1,5 @@
 import { SAMPLE_NEWS } from "./sample";
+import { loadIncidents } from "../geo/source";
 import type { NewsItem, NewsResult } from "./types";
 
 /**
@@ -33,6 +34,21 @@ export function setEndpoint(v: string): void {
 }
 
 export async function fetchNews(limit = 14): Promise<NewsResult> {
+  // Same pipeline as the Threat Globe (one shared, memoised fetch of
+  // Google News + security-newsroom RSS via the deployed Worker).
+  try {
+    const feed = await loadIncidents();
+    if (feed.status === "live" && feed.incidents.length) {
+      const items = feed.incidents
+        .slice()
+        .sort((a, b) => b.date - a.date)
+        .slice(0, limit)
+        .map((i) => ({ title: i.title, url: i.url, source: i.source, country: i.victim && !i.victim.approx ? i.victim.name : "", date: i.date }));
+      return { items, status: "live", via: feed.via };
+    }
+  } catch {
+    /* fall through */
+  }
   const endpoint = getEndpoint();
   if (endpoint) {
     try {

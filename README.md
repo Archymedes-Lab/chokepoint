@@ -62,6 +62,12 @@ motivation and a disposition, move through it and choose targets by **expected u
 - **A Live Threat Wire.** Real worldwide cyber-attack headlines alongside the model — the
   simulation next to the reality it abstracts. Keyless by default, or point it at the
   included Cloudflare Worker (`worker/`) for a reliable live feed (no API key ever in the repo).
+- **A Threat Globe.** A 3D world of cyber attacks reported in real newspapers over the last
+  7 days — Bing News searches across regional markets, newspaper security sections
+  (Guardian, NYT, BBC, Times of India…) and established security newsrooms. Copies of a story merge into one incident (coverage = outlets that
+  carried it); each is placed where the harm landed, and — only when the press explicitly
+  attributes it or names a group with a publicly reported origin — an arc runs back to the
+  *reported* attacker origin. Attribution is labelled as reported, never as verified.
 - **Damage in many dimensions.** Direct loss, recovery cost, GDP health, public trust,
   downtime, records stolen, victims, breaches — rippling across interdependent sectors.
 - **Scenario presets.** Load named policy worlds — *2025 Baseline*, *Economic Downturn*,
@@ -99,11 +105,22 @@ bun install
 bun run dev        # http://localhost:5173
 ```
 
-Build a static bundle (host it anywhere — there's no server):
+Build a static bundle (host it anywhere — the simulation needs no server):
 
 ```bash
 bun run build
 bun run preview
+```
+
+The live deployment (state.archymedes.xyz) is a Cloudflare Worker that serves the bundle plus
+`/api/feeds`, a 15-minute cached proxy over the news feeds (`worker/app.ts`, `wrangler.toml`).
+Parsing, clustering and geolocation run in the browser, in a Web Worker (`src/geo/`). Without
+the Worker — e.g. in `bun run dev` — the globe queries GDELT directly and falls back to a
+clearly labelled offline sample.
+
+```bash
+bun run deploy     # build + wrangler deploy
+bun test tests     # headline → incident extraction tests
 ```
 
 ## Using the ecosystem
@@ -152,9 +169,11 @@ bun run preview
 src/
 ├── world/      ← the 2D ecosystem model (agents, psychology, render) — PRIMARY
 ├── sim/        ← the value-chain Encounter model (engine, catalog) — drill-down
-├── ui/         ← React views: Ecosystem, WorldControls, WorldDashboard, Inspector,
-│                 PosturePanel, SingleRun, MonteCarlo
+├── geo/        ← news → incidents: RSS parsing, gazetteer, reported actor origins, clustering
+├── ui/         ← React views: Ecosystem, ThreatGlobe, WorldControls, WorldDashboard,
+│                 Inspector, PosturePanel, SingleRun, MonteCarlo
 └── App.tsx
+worker/         ← Cloudflare Worker: static app + cached feed proxy (app.ts); standalone news proxy
 docs/           ← WORLD · MODEL · CATALOG · METHODOLOGY · ETHICS · EXTENDING · SOURCES
 ```
 
