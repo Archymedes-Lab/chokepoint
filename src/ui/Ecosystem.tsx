@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { World } from "../world/model";
 import { drawWorld } from "../world/render";
 import { WorldControls } from "./WorldControls";
-import { WorldDashboard } from "./WorldDashboard";
+import { WorldDashboard, KpiStrip } from "./WorldDashboard";
 import { Inspector } from "./Inspector";
 import { MapKey, worldRead } from "./MapKey";
 import { ThreatWire } from "./ThreatWire";
-import { ToggleGroup, ToggleItem, Slider, SectionLabel } from "./radix";
+import { ToggleGroup, ToggleItem, Slider, Tabs, TabsList, Tab, TabPanel } from "./radix";
 import type { ColorBy } from "../world/render";
 import { SCENARIOS } from "../world/scenarios";
 
@@ -35,6 +35,7 @@ export function Ecosystem() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [colorBy, setColorBy] = useState<ColorBy>("motivation");
   const [scenario, setScenario] = useState<string>("baseline");
+  const [detail, setDetail] = useState<string>("profile");
 
   // Lazily create the world (no state updates during render).
   if (!worldRef.current) {
@@ -105,57 +106,40 @@ export function Ecosystem() {
     const y = (e.clientY - rect.top) * (WORLD_H / rect.height);
     const a = w.pickAgent(x, y, 14);
     setSelectedId(a ? a.id : null);
+    if (a) setDetail("profile");
   };
 
   const world = worldRef.current!;
 
+  const scenarioNote = SCENARIOS.find((s) => s.id === scenario)?.note || "Custom posture — you have changed a knob.";
+  const m = world.metrics();
+
   return (
     <div className="eco">
-      <aside className="eco-left">
-        <SectionLabel>Configuration</SectionLabel>
-        <WorldControls world={world} onChange={onKnob} />
-      </aside>
-
-      <div className="eco-center">
-        <div className="transport">
-          <button className="btn primary" onClick={() => setRunning((r) => !r)}>
-            {running ? "❚❚ Pause" : "▶ Play"}
-          </button>
-          <ToggleGroup aria-label="Speed" value={String(speed)} onValueChange={(v) => setSpeed(Number(v))}>
-            {SPEEDS.map((s) => (
-              <ToggleItem key={s} value={String(s)}>
-                {s}×
-              </ToggleItem>
-            ))}
-          </ToggleGroup>
-          <button className="btn" onClick={() => reset(pop)}>
-            ↻ Reset
-          </button>
-          <span className="badge mono" title="1 tick = 6 hours">Day {world.metrics().day}</span>
-          <select
-            className="scenario-select"
-            value={scenario}
-            onChange={(e) => applyScenario(e.target.value)}
-            title={SCENARIOS.find((s) => s.id === scenario)?.note || "Custom posture"}
-            aria-label="Scenario"
-          >
-            {scenario === "custom" && <option value="custom">Custom</option>}
-            {SCENARIOS.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <span className="eyebrow" style={{ marginLeft: 4 }}>colour by</span>
-          <ToggleGroup aria-label="Colour offenders by" value={colorBy} onValueChange={(v) => setColorBy(v as ColorBy)}>
-            {COLOR_MODES.map(([k, label]) => (
-              <ToggleItem key={k} value={k}>
-                {label}
-              </ToggleItem>
-            ))}
-          </ToggleGroup>
-          <div className="pop-field">
-            <span className="eyebrow">seed pop</span>
+      <aside className="eco-side eco-left" aria-label="Configuration">
+        <div className="side-hd">
+          <h2>Configuration</h2>
+          <span className="sub">inputs to the model</span>
+        </div>
+        <div className="side-scroll">
+          <div className="field scenario-field">
+            <label htmlFor="scenario">Scenario</label>
+            <select id="scenario" value={scenario} onChange={(e) => applyScenario(e.target.value)}>
+              {scenario === "custom" && <option value="custom">Custom</option>}
+              {SCENARIOS.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+            <div className="hint">{scenarioNote}</div>
+          </div>
+          <WorldControls world={world} onChange={onKnob} />
+          <div className="field pop-field">
+            <label>
+              <span>Seed population</span>
+              <span className="val">{pop}</span>
+            </label>
             <Slider
               aria-label="Seed population"
               min={100}
@@ -165,35 +149,99 @@ export function Ecosystem() {
               onValueChange={setPop}
               onCommit={(v) => reset(v)}
             />
-            <span className="mono" style={{ fontSize: 12 }}>{pop}</span>
+            <div className="hint">Restarts the world when released.</div>
+          </div>
+        </div>
+      </aside>
+
+      <section className="eco-center" aria-label="Simulation">
+        <div className="toolbar" role="toolbar" aria-label="Simulation controls">
+          <div className="tb-group">
+            <button className={`btn primary play ${running ? "" : "paused"}`} onClick={() => setRunning((r) => !r)} aria-pressed={!running}>
+              {running ? "❚❚ Pause" : "▶ Play"}
+            </button>
+            <ToggleGroup aria-label="Speed" value={String(speed)} onValueChange={(v) => setSpeed(Number(v))}>
+              {SPEEDS.map((s) => (
+                <ToggleItem key={s} value={String(s)}>
+                  {s}×
+                </ToggleItem>
+              ))}
+            </ToggleGroup>
+            <button className="btn" onClick={() => reset(pop)}>
+              ↻ Reset
+            </button>
+          </div>
+          <div className="tb-clock" title="1 tick = 6 hours">
+            <span className="tb-lbl">Day</span>
+            <span className="tb-day">{m.day}</span>
+            <span className={`tb-state ${running ? "live" : ""}`}>{running ? "Running" : "Paused"}</span>
+          </div>
+          <div className="tb-group tb-right">
+            <span className="tb-lbl">Colour by</span>
+            <ToggleGroup aria-label="Colour offenders by" value={colorBy} onValueChange={(v) => setColorBy(v as ColorBy)}>
+              {COLOR_MODES.map(([k, label]) => (
+                <ToggleItem key={k} value={k}>
+                  {label}
+                </ToggleItem>
+              ))}
+            </ToggleGroup>
           </div>
         </div>
 
-        <div className="canvas-wrap">
-          <canvas
-            ref={canvasRef}
-            width={WORLD_W}
-            height={WORLD_H}
-            onClick={onCanvasClick}
-            className="world-canvas"
-          />
+        <KpiStrip world={world} />
+
+        <div className="stage">
+          <div className="stage-fit">
+            <canvas
+              ref={canvasRef}
+              width={WORLD_W}
+              height={WORLD_H}
+              onClick={onCanvasClick}
+              className="world-canvas"
+              aria-label="Simulated cybercrime ecosystem. Click an offender to inspect it."
+            />
+            {!running && <div className="stage-badge">Paused</div>}
+            {selectedId == null && <div className="stage-hint">Click any offender to inspect it</div>}
+          </div>
         </div>
 
-        <div className="mapread">
-          <span className="mapread-tag">MAP READ</span>
+        <div className="mapread" aria-live="polite">
+          <span className="mapread-tag">Map read</span>
           <span className="mapread-text">{worldRead(world)}</span>
         </div>
 
-        <SectionLabel>Detail &amp; Intelligence</SectionLabel>
-        <MapKey colorBy={colorBy} />
+        <Tabs className="drawer" value={detail} onValueChange={setDetail}>
+          <div className="drawer-hd">
+            <TabsList aria-label="Detail">
+              <Tab value="profile">
+                Offender profile{selectedId != null && <span className="tab-dot" aria-hidden="true" />}
+              </Tab>
+              <Tab value="wire">Live threat wire</Tab>
+              <Tab value="key">Map key</Tab>
+            </TabsList>
+          </div>
+          <div className="drawer-scroll">
+            <TabPanel value="profile">
+              <Inspector world={world} selectedId={selectedId} />
+            </TabPanel>
+            <TabPanel value="wire" forceMount hidden={detail !== "wire"}>
+              <ThreatWire />
+            </TabPanel>
+            <TabPanel value="key">
+              <MapKey colorBy={colorBy} />
+            </TabPanel>
+          </div>
+        </Tabs>
+      </section>
 
-        <ThreatWire />
-
-        <Inspector world={world} selectedId={selectedId} />
-      </div>
-
-      <aside className="eco-right">
-        <WorldDashboard world={world} />
+      <aside className="eco-side eco-right" aria-label="Outcomes">
+        <div className="side-hd">
+          <h2>Outcomes</h2>
+          <span className="sub">what the model is producing</span>
+        </div>
+        <div className="side-scroll">
+          <WorldDashboard world={world} />
+        </div>
       </aside>
     </div>
   );

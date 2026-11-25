@@ -18,10 +18,10 @@ export function Inspector({ world, selectedId }: { world: World; selectedId: num
   const a = selectedId != null ? world.agents.find((x) => x.id === selectedId) : null;
 
   return (
-    <CollapsiblePanel title="Forensic Profile" sub={a ? `offender #${a.id}` : "click an offender"}>
+    <CollapsiblePanel embedded title="Forensic Profile" sub={a ? `Offender #${a.id}` : undefined}>
         {!a && (
-          <div className="muted" style={{ fontSize: "0.82rem" }}>
-            Click any moving pixel in the world to inspect that offender — their motivation,
+          <div className="empty">
+            <b>No offender selected.</b> Click any moving pixel in the world to inspect that offender — their motivation,
             capability, history, and the live expected-utility reasoning behind their next move.
           </div>
         )}

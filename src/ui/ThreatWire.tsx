@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchNews, getEndpoint, setEndpoint } from "../news/providers";
 import type { NewsResult } from "../news/types";
-import { ScrollArea, CollapsiblePanel } from "./radix";
+import { CollapsiblePanel } from "./radix";
 
 const REFRESH_MS = 5 * 60 * 1000;
 
@@ -34,6 +34,7 @@ export function ThreatWire() {
 
   return (
     <CollapsiblePanel
+      embedded
       className="wire"
       title="Live Threat Wire"
       sub="real cyber-attack news worldwide"
@@ -92,8 +93,7 @@ export function ThreatWire() {
 
         {res?.note && <div className="hint wire-note">{res.note}</div>}
 
-        <ScrollArea maxHeight={300}>
-          <div className="wire-list">
+                  <div className="wire-list">
             {(!res || res.items.length === 0) && !loading && (
               <div className="muted" style={{ fontSize: 12 }}>No headlines right now.</div>
             )}
@@ -117,7 +117,6 @@ export function ThreatWire() {
               </div>
             ))}
           </div>
-        </ScrollArea>
     </CollapsiblePanel>
   );
 }

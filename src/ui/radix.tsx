@@ -157,6 +157,7 @@ export function CollapsiblePanel({
   right,
   defaultOpen = true,
   className,
+  embedded,
   children,
 }: {
   title: string;
@@ -164,9 +165,26 @@ export function CollapsiblePanel({
   right?: ReactNode;
   defaultOpen?: boolean;
   className?: string;
+  /** Render without the collapsible chrome — for use inside a tab/drawer that
+   *  already names the content. Header controls (`right`) are kept. */
+  embedded?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  if (embedded) {
+    return (
+      <div className={`embedded ${className ?? ""}`}>
+        {(sub || right) && (
+          <div className="embedded-hd">
+            {sub && <span className="sub">{sub}</span>}
+            <span className="cpanel-spacer" />
+            {right}
+          </div>
+        )}
+        {children}
+      </div>
+    );
+  }
   return (
     <RCollapsibleP.Root className={`panel cpanel ${className ?? ""}`} open={open} onOpenChange={setOpen}>
       <div className="cpanel-hd">
@@ -200,5 +218,16 @@ export function ScrollArea({ children, maxHeight }: { children: ReactNode; maxHe
         <RScrollAreaP.Thumb className="rx-scrollbar-thumb" />
       </RScrollAreaP.Scrollbar>
     </RScrollAreaP.Root>
+  );
+}
+
+/** Progressive disclosure for explanatory copy: the panel shows the numbers,
+ *  the "why" is one click away instead of always competing for attention. */
+export function Explainer({ label = "How to read this", children }: { label?: string; children: ReactNode }) {
+  return (
+    <details className="explainer">
+      <summary>{label}</summary>
+      <div className="explainer-body">{children}</div>
+    </details>
   );
 }

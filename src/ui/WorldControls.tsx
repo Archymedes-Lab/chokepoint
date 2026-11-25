@@ -27,7 +27,7 @@ export function WorldControls({ world, onChange }: { world: World; onChange: () 
 
   return (
     <>
-      <CollapsiblePanel title="External Causes" sub="why offending rises &amp; falls">
+      <CollapsiblePanel title="External Causes" sub="drivers">
         <>
           {DRIVER_META.map((d) => (
             <div className="field" key={d.key}>
@@ -54,12 +54,12 @@ export function WorldControls({ world, onChange }: { world: World; onChange: () 
         </>
       </CollapsiblePanel>
 
-      <CollapsiblePanel title="Authority Levers" sub="what the response invests in">
+      <CollapsiblePanel title="Authority Levers" sub="your response">
         <>
           <div className={`budget ${over ? "over" : ""}`}>
             <div className="budget-row">
-              <span className="eyebrow">Enforcement budget</span>
-              <span className="mono" style={{ fontSize: 12 }}>{Math.round(budget * 100)}%</span>
+              <span className="budget-lbl">Enforcement budget used</span>
+              <span className="budget-val">{Math.round(budget * 100)}%</span>
             </div>
             <div className="heatbar">
               <span style={{ width: `${Math.min(100, budget * 100)}%`, background: over ? "var(--crit)" : "var(--ink)" }} />
@@ -67,10 +67,10 @@ export function WorldControls({ world, onChange }: { world: World; onChange: () 
             <div className="hint" style={{ marginTop: 6 }}>
               Fielded {Math.round(world.metrics().fieldedCapability * 100)}% of funded — capability lags by months.
             </div>
-            {over && <div className="hint" style={{ color: "var(--crit)", marginTop: 4 }}>Over budget — real authorities can't fund every lever at once. Prioritise.</div>}
+            {over && <div className="budget-alert" role="alert">Over budget — real authorities can't fund every lever at once. Prioritise.</div>}
           </div>
           {IV_META.map((d) => (
-            <div className="field" key={d.key}>
+            <div className={`field lever ${world.interventions[d.key] > 0 ? "active" : ""}`} key={d.key}>
               <label>
                 <span className="label-wrap">
                   {d.label}

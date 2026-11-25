@@ -50,7 +50,7 @@ function Row({ glyph, label }: { glyph: React.ReactNode; label: string }) {
 
 export function MapKey({ colorBy }: { colorBy: ColorBy }) {
   return (
-    <CollapsiblePanel className="mapkey" title="Map Key" sub="what every mark means" defaultOpen={false}>
+    <CollapsiblePanel embedded className="mapkey" title="Map Key">
         <div className="key-grid">
           <div className="key-cat">
             <div className="eyebrow">Infrastructure</div>

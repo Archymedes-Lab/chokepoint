@@ -49,7 +49,7 @@ export default function App() {
                 <path d="M11 16h10M16 11l5 5-5 5" stroke="var(--harm)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <h1>Chokepoint</h1>
-              <span className="ver">v0.3</span>
+              <span className="ver">v0.10</span>
             </div>
             <div className="mode-tabs">
               <TabsList aria-label="Model">
@@ -57,8 +57,8 @@ export default function App() {
                 <Tab value="micro">Encounter model</Tab>
               </TabsList>
             </div>
-            <span className="badge">Defensive · Simulation</span>
-            <span className="badge">
+            <span className="badge hide-sm">Defensive · Simulation</span>
+            <span className="badge hide-sm">
               Calibrated 2025–26
               <Info>
                 Payment rates (~23% ransomware / 19% data-theft), access vectors, dwell time and
@@ -72,28 +72,28 @@ export default function App() {
               onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
               aria-label="Toggle colour theme"
             >
-              {theme === "light" ? "Dark" : "Light"}
+              {theme === "light" ? "Dark theme" : "Light theme"}
             </button>
           </div>
         </header>
 
-        <TabPanel value="eco">
+        <TabPanel value="eco" className="view view-eco">
           <Ecosystem />
         </TabPanel>
-        <TabPanel value="micro">
+        <TabPanel value="micro" className="view view-micro">
           <MicroApp />
         </TabPanel>
 
         <footer className="foot">
-          <div className="foot-in">
-            <div>
-              <b>Chokepoint</b> is an abstract, criminological model for defensive planning, policy
-              analysis, and education. It simulates offender and defender <i>decisions and population
-              dynamics</i> — never real-world actions — and contains no operational attack detail.
-              Parameters are calibrated from public research; see <code>docs/</code>.
-            </div>
-            <div className="muted">Apache-2.0 · TLP:CLEAR · for defenders, authorities, and researchers.</div>
-          </div>
+          <span>
+            <b>Chokepoint</b> · abstract criminological model for defensive planning — no operational attack detail
+          </span>
+          <Info>
+            Simulates offender and defender <i>decisions and population dynamics</i> — never real-world actions.
+            Parameters are calibrated from public research; see docs/.
+          </Info>
+          <span className="spacer" />
+          <span className="muted">Apache-2.0 · TLP:CLEAR</span>
         </footer>
       </Tabs>
     </TooltipProvider>
